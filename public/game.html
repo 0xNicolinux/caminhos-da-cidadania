@@ -578,7 +578,7 @@ function drawCurtain(open){
 }
 function theaterResize(){
  if(!TH.c)return;const vw=innerWidth,vh=innerHeight,sp=document.getElementById('thSpot').getBoundingClientRect();
- TH.P=Math.max(2,Math.min(8,Math.floor(Math.min(vw/150,Math.max(sp.height,90)/46))));
+ TH.P=Math.max(2,Math.min(8,Math.floor(Math.min(vw/125,Math.max(sp.height,90)/46))));
  TH.W=TH.c.width=Math.ceil(vw/TH.P);TH.H=TH.c.height=Math.ceil(vh/TH.P);
  TH.feet=Math.round((sp.bottom-6)/TH.P);TH.x.imageSmoothingEnabled=false;
  TH.el.style.setProperty('--val',Math.max(10,Math.round(TH.H*.07))*TH.P+'px');
