@@ -522,11 +522,11 @@ function drawDancer(d,x,y,ph,walk){
  else if(d.style=='cap'){R(bx-1,by-3,11,4,'#ffc233');R(bx+8,by,5,2,'#ffc233');R(bx-1,by+1,2,2,H);R(bx+1,by+7,7,1,H)}
  else{R(bx-1,by-2,11,3,H);R(bx-2,by,3,11+Math.round(Math.abs(s)),H);R(bx+8,by,3,11+Math.round(Math.abs(s)),H)}
  // placa com o nome acima da cabeça
- if(d.name&&!walk){const X=TH.x,ny=hy-32;X.font='6px VT323,monospace';X.textAlign='center';
+ if(d.name&&!walk){const X=TH.x,ny=hy-30;X.font='4px VT323,monospace';X.textAlign='center';
   const w=Math.ceil(X.measureText(d.name).width);
-  X.globalAlpha=.85;R(x-w/2-3,ny,w+6,8,'#120a22');X.globalAlpha=1;
-  R(x-w/2-3,ny,w+6,1,'#ffc233');R(x-w/2-3,ny+7,w+6,1,'#ffc233');
-  X.fillStyle='#fff4dc';X.fillText(d.name,x,ny+6)}
+  X.globalAlpha=.85;R(x-w/2-2,ny,w+4,6,'#120a22');X.globalAlpha=1;
+  R(x-w/2-2,ny,w+4,1,'#ffc233');R(x-w/2-2,ny+5,w+4,1,'#ffc233');
+  X.fillStyle='#fff4dc';X.fillText(d.name,x,ny+4)}
 }
 
 function drawStage(t){
@@ -567,7 +567,7 @@ function theaterResize(){
  TH.W=TH.c.width=Math.ceil(vw/TH.P);TH.H=TH.c.height=Math.ceil(vh/TH.P);
  TH.feet=Math.round((sp.bottom-30)/TH.P);TH.x.imageSmoothingEnabled=false;
  TH.el.style.setProperty('--val',Math.max(10,Math.round(TH.H*.07))*TH.P+'px');
- const gap=Math.min(30,Math.floor(TH.W/4.6));TH.pos=[-1.5,-.5,.5,1.5].map(k=>Math.round(TH.W/2+k*gap));
+ const gap=Math.min(46,Math.floor(TH.W/3.8));TH.pos=[-1.5,-.5,.5,1.5].map(k=>Math.round(TH.W/2+k*gap));
 }
 function setPhase(n){if(TH.phase===n)return;TH.phase=n;TH.el.className='p'+n;
  if(n==3)stageSfx('curtain');if(n==4&&!TH.played.f){TH.played.f=1;stageSfx('enter')}if(n==5)stageSfx('drop');if(n==6&&!TH.played.m){TH.played.m=1;fanfare('menu')}}
