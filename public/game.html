@@ -573,7 +573,7 @@ function setPhase(n){if(TH.phase===n)return;TH.phase=n;TH.el.className='p'+n;
  if(n==3)stageSfx('curtain');if(n==4&&!TH.played.f){TH.played.f=1;stageSfx('enter')}if(n==5)stageSfx('drop');if(n==6&&!TH.played.m){TH.played.m=1;fanfare('menu')}}
 function stageSfx(k){if(!AC||!mus)return;const t=AC.currentTime;
  if(k=='curtain'){for(let i=0;i<10;i++)tone(900-i*70,t+i*.06,.08,'triangle',.025)}
- if(k=='enter')[60,64,67,72,67,72].forEach((n,i)=>tone(NT(n),t+i*.1,.14,'square',.05))}
+ if(k=='enter')[60,64,67,72,67,72].forEach((n,i)=>tone(NT(n),t+i*.1,.14,'square',.05));
  if(k=='drop'){tone(1400,t,.3,'sine',.05,300);tone(NT(48),t+.18,.5,'triangle',.09)}}
 // groove de palco: bumbo + caixa + chimbal enquanto os dançarinos se apresentam
 let grT=0,grStep=0;
