@@ -186,7 +186,7 @@ h3.ok{color:var(--ok)}h3.no{color:var(--no)}
 .th-title .titleSub{font:clamp(8px,1.4vw,12px)/1.8 "Press Start 2P",monospace;color:var(--tx)}
 #theater.p5 .th-title,#theater.p6 .th-title{opacity:1;animation:thDrop .7s steps(7)}
 @keyframes thDrop{0%{transform:translateY(-60px);opacity:0}70%{transform:translateY(6px)}}
-#thSpot{flex:0 1 auto;min-height:110px;height:38vh;width:100%;pointer-events:none}
+#thSpot{flex:0 1 auto;min-height:110px;height:30vh;width:100%;pointer-events:none}
 .th-menu{width:min(460px,100%);margin:0 auto;display:flex;flex-direction:column;gap:10px;opacity:0;visibility:hidden}
 #theater.p6 .th-menu{opacity:1;visibility:visible;animation:thUp .5s steps(5)}
 @keyframes thUp{from{transform:translateY(40px);opacity:0}}
@@ -565,7 +565,7 @@ function theaterResize(){
  if(!TH.c)return;const vw=innerWidth,vh=innerHeight,sp=document.getElementById('thSpot').getBoundingClientRect();
  TH.P=Math.max(2,Math.min(8,Math.floor(Math.min(vw/125,Math.max(sp.height,90)/46))));
  TH.W=TH.c.width=Math.ceil(vw/TH.P);TH.H=TH.c.height=Math.ceil(vh/TH.P);
- TH.feet=Math.round((sp.bottom-20)/TH.P);TH.x.imageSmoothingEnabled=false;
+ TH.feet=Math.round((sp.bottom-30)/TH.P);TH.x.imageSmoothingEnabled=false;
  TH.el.style.setProperty('--val',Math.max(10,Math.round(TH.H*.07))*TH.P+'px');
  const gap=Math.min(30,Math.floor(TH.W/4.6));TH.pos=[-1.5,-.5,.5,1.5].map(k=>Math.round(TH.W/2+k*gap));
 }
