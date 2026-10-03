@@ -89,10 +89,6 @@ body{overflow:hidden;background:
 canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
 #ov{z-index:6}
 #pad{z-index:8}
-#action{display:none;position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));
- width:96px;height:64px;border:3px solid #ffd166;border-radius:50%;
- background:#18213b;color:#ffd166;font:10px/1.2 "Press Start 2P",monospace;
- box-shadow:0 5px 0 #000,0 0 18px #ffd16633;touch-action:none;user-select:none;z-index:20}
 #pad button{font-size:25px;border-color:#dfe7ff;background:#121a31;border-radius:12px;
  box-shadow:0 5px 0 #000,0 0 12px #4cc9f022}
 .mobileOnly{display:none}
@@ -115,14 +111,12 @@ body.immersive #top{flex:0 0 auto;margin:0;padding:7px max(7px,env(safe-area-ins
  background:linear-gradient(180deg,#0c1121,#080b14)}
 body.immersive .stage{flex:1 1 auto;min-height:0;height:100%;aspect-ratio:auto;border:0;box-shadow:none}
 body.immersive #pad{position:fixed;left:18px;bottom:calc(18px + env(safe-area-inset-bottom));margin:0;z-index:20}
-body.immersive #action{display:block}
 body.immersive #overlay{z-index:30}
 @media(max-width:700px){
  #app{padding:6px}
  #top{grid-template-columns:minmax(0,1fr) auto auto}
  .topbtn{width:48px}
  .stage{aspect-ratio:5/3}
- #action{display:block}
  #pad{margin-bottom:0}
  .teamGrid{grid-template-columns:1fr 1fr}
  .partners{grid-template-columns:1fr 1fr}
@@ -132,7 +126,6 @@ body.immersive #overlay{z-index:30}
  #hud{font-size:7px;line-height:1.6;padding:7px 8px}
  .teamGrid{grid-template-columns:1fr 1fr}
  .partner{min-height:68px}.partner img{max-height:48px}
- #action{width:82px;height:58px;right:10px}
  #pad{grid-template-columns:repeat(3,54px);gap:4px;left:10px}
  #pad button{padding:9px 0}
 }
@@ -175,7 +168,7 @@ button:active{transform:translateY(4px);box-shadow:0 1px 0 #000!important}
 .creditsPanel{background:var(--ink);border:3px solid var(--or);box-shadow:0 6px 0 #000}
 .creditsTitle{color:var(--or)}
 .neon{color:var(--ac);text-shadow:none}
-#pad button,#action{border-radius:0!important;background:var(--pn);border-color:var(--or)}
+#pad button{border-radius:0!important;background:var(--pn);border-color:var(--or)}
 h3.ok{color:var(--ok)}h3.no{color:var(--no)}
 
 #theater{position:fixed;inset:0;z-index:10000;background:#0d0718;overflow:hidden;font:20px/1.25 VT323,monospace;color:var(--tx);--val:40px}
