@@ -521,12 +521,12 @@ function drawDancer(d,x,y,ph,walk){
  else if(d.style=='puff'){R(bx-3,by-6,15,7,H);R(bx-3,by,3,5,H);R(bx+9,by,3,5,H);R(bx-1,by-7,11,2,H)}
  else if(d.style=='cap'){R(bx-1,by-3,11,4,'#ffc233');R(bx+8,by,5,2,'#ffc233');R(bx-1,by+1,2,2,H);R(bx+1,by+7,7,1,H)}
  else{R(bx-1,by-2,11,3,H);R(bx-2,by,3,11+Math.round(Math.abs(s)),H);R(bx+8,by,3,11+Math.round(Math.abs(s)),H)}
- // placa com o nome sob os pés
- if(d.name&&!walk){const X=TH.x;X.font='6px VT323,monospace';X.textAlign='center';
+ // placa com o nome acima da cabeça
+ if(d.name&&!walk){const X=TH.x,ny=hy-32;X.font='6px VT323,monospace';X.textAlign='center';
   const w=Math.ceil(X.measureText(d.name).width);
-  X.globalAlpha=.82;R(x-w/2-3,y+4,w+6,8,'#120a22');X.globalAlpha=1;
-  R(x-w/2-3,y+4,w+6,1,'#ffc233');
-  X.fillStyle='#fff4dc';X.fillText(d.name,x,y+10)}
+  X.globalAlpha=.85;R(x-w/2-3,ny,w+6,8,'#120a22');X.globalAlpha=1;
+  R(x-w/2-3,ny,w+6,1,'#ffc233');R(x-w/2-3,ny+7,w+6,1,'#ffc233');
+  X.fillStyle='#fff4dc';X.fillText(d.name,x,ny+6)}
 }
 
 function drawStage(t){
