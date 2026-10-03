@@ -1,0 +1,465 @@
+{
+  "P": [
+    {
+      "titulo": "A ficha na secretaria",
+      "personagem": "Marta",
+      "x": 3,
+      "y": 4,
+      "cor": "#e76f51",
+      "perguntas": [
+        {
+          "categoria": "Direitos",
+          "pergunta": "Marta está organizando os documentos de uma turma e pergunta: \"Quando uma lei reúne direitos e regras de proteção para um grupo, como crianças, jovens ou pessoas idosas, que tipo de lei estamos estudando?\"",
+          "resposta": "Um estatuto",
+          "alternativas": [
+            "Um regulamento interno da escola",
+            "Uma punição administrativa"
+          ],
+          "explicacao": "Estatuto é uma lei que reúne direitos e regras de proteção relacionados a um grupo específico."
+        },
+        {
+          "categoria": "Proteção",
+          "pergunta": "Na ficha da turma aparecem Léo, com 11 anos, e Bia, com 15. Como o ECA classifica os dois?",
+          "resposta": "Léo é criança e Bia é adolescente",
+          "alternativas": [
+            "Os dois são crianças",
+            "Os dois são adolescentes"
+          ],
+          "explicacao": "Pelo ECA, criança é a pessoa até 12 anos incompletos. Adolescente é a pessoa entre 12 e 18 anos."
+        },
+        {
+          "categoria": "Direitos",
+          "pergunta": "Um aluno comenta: \"Se é criança, adulto decide tudo por ela e seus direitos ficam em segundo plano.\" Qual ideia do ECA corrige essa afirmação?",
+          "resposta": "Crianças e adolescentes são sujeitos de direitos e têm proteção integral",
+          "alternativas": [
+            "Os direitos dependem do desempenho escolar",
+            "O ECA trata apenas de deveres"
+          ],
+          "explicacao": "O ECA reconhece crianças e adolescentes como sujeitos de direitos e estabelece a proteção integral."
+        }
+      ]
+    },
+    {
+      "titulo": "Duas idades, dois caminhos",
+      "personagem": "Rafael",
+      "x": 7,
+      "y": 4,
+      "cor": "#f4a261",
+      "perguntas": [
+        {
+          "categoria": "Direitos",
+          "pergunta": "Rafael tem 16 anos e participa de um curso profissional. Ele pergunta: \"Sou adolescente ou jovem?\" Qual resposta explica melhor a situação?",
+          "resposta": "Ele é adolescente pelo ECA e também está na faixa etária considerada jovem pelo Estatuto da Juventude",
+          "alternativas": [
+            "Aos 16 anos, ele só pode ser considerado jovem",
+            "A classificação muda conforme o tipo de escola"
+          ],
+          "explicacao": "O Estatuto da Juventude considera jovens as pessoas de 15 a 29 anos. Para quem tem entre 15 e 18 anos, o ECA continua sendo aplicado, com as regras do Estatuto da Juventude quando não houver conflito com a proteção integral."
+        },
+        {
+          "categoria": "Direitos",
+          "pergunta": "No mural do curso há uma pergunta: \"Para que serve o Estatuto da Juventude?\"",
+          "resposta": "Para reconhecer direitos dos jovens e orientar políticas públicas voltadas à juventude",
+          "alternativas": [
+            "Para substituir o ECA",
+            "Para tratar somente de lazer"
+          ],
+          "explicacao": "O Estatuto da Juventude reúne direitos, princípios e diretrizes para as políticas públicas de juventude."
+        },
+        {
+          "categoria": "Participação",
+          "pergunta": "Rafael quer participar das discussões sobre atividades que afetam os jovens do município. Qual ideia do Estatuto da Juventude aparece nessa situação?",
+          "resposta": "Participação social e política dos jovens",
+          "alternativas": [
+            "Afastamento dos jovens das decisões públicas",
+            "Participação somente de pessoas com mais de 29 anos"
+          ],
+          "explicacao": "A participação social e política dos jovens está entre os princípios do Estatuto da Juventude."
+        }
+      ]
+    },
+    {
+      "titulo": "O cartaz no corredor",
+      "personagem": "Camila",
+      "x": 3,
+      "y": 7,
+      "cor": "#e9c46a",
+      "perguntas": [
+        {
+          "categoria": "Direitos",
+          "pergunta": "Camila encontra um cartaz com a frase: \"Aqui, o direito muda conforme a família, a renda ou a origem do aluno.\" O que está errado nessa ideia?",
+          "resposta": "Os direitos previstos no ECA se aplicam às crianças e aos adolescentes sem discriminação",
+          "alternativas": [
+            "O ECA só protege quem estuda em escola pública",
+            "Os direitos dependem da renda da família"
+          ],
+          "explicacao": "O ECA garante direitos às crianças e aos adolescentes sem discriminação."
+        },
+        {
+          "categoria": "Proteção",
+          "pergunta": "Uma escola percebe que um estudante precisa de proteção e apoio. Qual princípio deve orientar a forma de tratar o caso?",
+          "resposta": "Proteção integral e prioridade dos direitos da criança e do adolescente",
+          "alternativas": [
+            "A situação deve ser tratada apenas como problema disciplinar",
+            "A proteção depende da aprovação da turma"
+          ],
+          "explicacao": "A proteção integral considera a criança e o adolescente como sujeitos de direitos e orienta a atuação para protegê-los."
+        },
+        {
+          "categoria": "Direitos",
+          "pergunta": "Por que o ECA envolve família, sociedade e poder público na proteção de crianças e adolescentes?",
+          "resposta": "Porque a garantia dos direitos depende da atuação conjunta desses responsáveis",
+          "alternativas": [
+            "Porque a escola é a única responsável",
+            "Porque somente a família tem deveres"
+          ],
+          "explicacao": "O ECA estabelece responsabilidades para família, comunidade, sociedade em geral e poder público na efetivação dos direitos."
+        }
+      ]
+    },
+    {
+      "titulo": "A sala do Conselho",
+      "personagem": "Seu Raul",
+      "x": 10,
+      "y": 7,
+      "cor": "#264653",
+      "perguntas": [
+        {
+          "categoria": "Proteção",
+          "pergunta": "Seu Raul mostra uma placa: \"Conselho Tutelar\". Como esse órgão é definido pelo ECA?",
+          "resposta": "É um órgão permanente, autônomo e não jurisdicional",
+          "alternativas": [
+            "É uma delegacia especializada",
+            "É um tribunal municipal"
+          ],
+          "explicacao": "O ECA define o Conselho Tutelar como órgão permanente, autônomo e não jurisdicional, responsável por zelar pelos direitos da criança e do adolescente."
+        },
+        {
+          "categoria": "Proteção",
+          "pergunta": "Na eleição local aparecem cinco pessoas escolhidas pela comunidade para compor o Conselho Tutelar. Essa composição está de acordo com o ECA?",
+          "resposta": "Sim. O Conselho é composto por 5 membros escolhidos pela população local",
+          "alternativas": [
+            "Não. O Conselho precisa ter apenas 3 membros",
+            "Não. Os membros são escolhidos exclusivamente pelo prefeito"
+          ],
+          "explicacao": "O ECA estabelece cinco membros por Conselho Tutelar, escolhidos pela população local."
+        },
+        {
+          "categoria": "Proteção",
+          "pergunta": "Uma escola procura o Conselho porque identificou uma situação em que os direitos de um adolescente podem estar sendo violados. O que está dentro das atribuições do Conselho?",
+          "resposta": "Atender a situação, orientar responsáveis e requisitar serviços quando necessário",
+          "alternativas": [
+            "Julgar o caso como um tribunal",
+            "Aplicar diretamente uma pena criminal"
+          ],
+          "explicacao": "O Conselho Tutelar atua na proteção dos direitos. Entre suas atribuições estão atender casos, orientar responsáveis e requisitar serviços públicos."
+        }
+      ]
+    },
+    {
+      "titulo": "Dois crachás",
+      "personagem": "Júlia",
+      "x": 17,
+      "y": 4,
+      "cor": "#9b5de5",
+      "perguntas": [
+        {
+          "categoria": "Direitos",
+          "pergunta": "No SENAI, Júlia, de 22 anos, conversa com Dona Lúcia, de 68. Uma delas pergunta: \"Qual estatuto corresponde à nossa faixa etária?\" Qual associação está correta?",
+          "resposta": "Júlia está na faixa do Estatuto da Juventude e Dona Lúcia está na faixa do Estatuto da Pessoa Idosa",
+          "alternativas": [
+            "As duas estão no Estatuto da Juventude",
+            "As duas estão no Estatuto da Pessoa Idosa"
+          ],
+          "explicacao": "O Estatuto da Juventude considera jovens as pessoas de 15 a 29 anos. O Estatuto da Pessoa Idosa protege pessoas com 60 anos ou mais."
+        },
+        {
+          "categoria": "Direitos",
+          "pergunta": "Dona Lúcia procura um serviço público e pergunta por que existe uma legislação específica para sua faixa etária. Qual resposta faz sentido?",
+          "resposta": "Porque o Estatuto estabelece direitos e orienta políticas e serviços destinados à pessoa idosa",
+          "alternativas": [
+            "Porque ele trata somente de aposentadoria",
+            "Porque ele substitui todas as outras leis"
+          ],
+          "explicacao": "O Estatuto da Pessoa Idosa estabelece direitos e orienta a proteção e a oferta de políticas e serviços para pessoas com 60 anos ou mais."
+        },
+        {
+          "categoria": "Direitos",
+          "pergunta": "Júlia percebe que uma política pública pensada para jovens existe no papel, mas o serviço não está disponível para eles. Qual questão do Estatuto da Juventude aparece nesse exemplo?",
+          "resposta": "A importância de transformar os direitos previstos em políticas e serviços disponíveis",
+          "alternativas": [
+            "O Estatuto vale apenas quando a pessoa tem renda",
+            "Direitos não precisam de políticas públicas"
+          ],
+          "explicacao": "O Estatuto da Juventude organiza direitos e diretrizes para políticas públicas. Na prática, isso envolve a existência e o acesso a políticas e serviços."
+        }
+      ]
+    }
+  ],
+  "S": [
+    {
+      "titulo": "O caminho para o curso",
+      "personagem": "Carlos",
+      "x": 3,
+      "y": 7,
+      "cor": "#2a9d8f",
+      "perguntas": [
+        {
+          "categoria": "Prevenção",
+          "pergunta": "Carlos percebe que muitos alunos de um bairro precisam percorrer um trajeto difícil para chegar ao curso, têm pouco acesso a serviços e vivem em condições econômicas instáveis. Qual fator de risco deve ser observado?",
+          "resposta": "Vulnerabilidade",
+          "alternativas": [
+            "Participação social",
+            "Governança federativa"
+          ],
+          "explicacao": "Vulnerabilidade aparece quando condições sociais ou econômicas aumentam a exposição de pessoas e grupos a riscos."
+        },
+        {
+          "categoria": "Prevenção",
+          "pergunta": "A equipe decide levantar informações sobre transporte, iluminação e acesso aos serviços antes de definir uma ação. Por que isso ajuda?",
+          "resposta": "Porque permite identificar fatores de risco e planejar ações de prevenção",
+          "alternativas": [
+            "Porque permite escolher quem será culpado",
+            "Porque elimina a necessidade de ouvir a comunidade"
+          ],
+          "explicacao": "Conhecer os fatores de risco ajuda a entender o problema antes de escolher medidas de prevenção."
+        },
+        {
+          "categoria": "Prevenção",
+          "pergunta": "Duas regiões têm problemas diferentes. Uma tem pouca iluminação e outra tem maior isolamento social. O que essa comparação mostra?",
+          "resposta": "Os fatores de risco podem mudar de acordo com as características de cada território",
+          "alternativas": [
+            "Todo bairro precisa da mesma ação",
+            "Fatores de risco só existem em áreas com violência"
+          ],
+          "explicacao": "A identificação de riscos precisa considerar as características e condições de cada contexto."
+        }
+      ]
+    },
+    {
+      "titulo": "O grupo da turma",
+      "personagem": "Ana",
+      "x": 18,
+      "y": 4,
+      "cor": "#e63946",
+      "perguntas": [
+        {
+          "categoria": "Segurança",
+          "pergunta": "No grupo de mensagens da turma, um aluno é sempre deixado de fora das atividades por causa de sua origem. Qual fator de risco aparece nessa situação?",
+          "resposta": "Discriminação",
+          "alternativas": [
+            "Vulnerabilidade",
+            "Governança federativa"
+          ],
+          "explicacao": "Discriminação é o tratamento desigual ou injusto baseado em uma característica da pessoa ou do grupo."
+        },
+        {
+          "categoria": "Segurança",
+          "pergunta": "Em outra turma, um estudante recebe tratamento diferente por causa da cor da pele. O problema está ligado a quê?",
+          "resposta": "Discriminação",
+          "alternativas": [
+            "Participação social",
+            "Vigência decenal"
+          ],
+          "explicacao": "Quando uma pessoa é tratada de forma desigual por causa de sua cor ou outra característica, temos um exemplo de discriminação."
+        },
+        {
+          "categoria": "Prevenção",
+          "pergunta": "A equipe responsável pelo curso percebe que esse tipo de situação está se repetindo e decide registrar os casos para entender o padrão. Qual é a utilidade desse cuidado?",
+          "resposta": "Identificar o fator de risco e apoiar ações de prevenção",
+          "alternativas": [
+            "Criar uma punição automática",
+            "Evitar que o problema seja discutido"
+          ],
+          "explicacao": "Reconhecer padrões ajuda a perceber o problema e a planejar ações de prevenção."
+        }
+      ]
+    },
+    {
+      "titulo": "Um sinal que se repete",
+      "personagem": "Bia",
+      "x": 8,
+      "y": 7,
+      "cor": "#f94144",
+      "perguntas": [
+        {
+          "categoria": "Segurança",
+          "pergunta": "Bia, monitora de uma turma, percebe que um aluno vem sendo humilhado por um adulto responsável e está recebendo cada vez menos cuidados básicos em casa. Qual fator de risco aparece no caso?",
+          "resposta": "Maus-tratos",
+          "alternativas": [
+            "Participação social",
+            "Governança federativa"
+          ],
+          "explicacao": "Maus-tratos podem envolver ações ou falta de cuidados que prejudicam uma criança ou adolescente."
+        },
+        {
+          "categoria": "Prevenção",
+          "pergunta": "Em outro caso, uma família enfrenta perda de renda e dificuldades para manter necessidades básicas. Sem concluir que houve maus-tratos, qual fator deve ser observado?",
+          "resposta": "Vulnerabilidade",
+          "alternativas": [
+            "Discriminação",
+            "Participação social"
+          ],
+          "explicacao": "Uma situação econômica difícil pode aumentar a exposição a riscos e deve ser analisada como possível vulnerabilidade."
+        },
+        {
+          "categoria": "Segurança",
+          "pergunta": "Por que é importante diferenciar maus-tratos, discriminação e vulnerabilidade?",
+          "resposta": "Porque são fatores de risco diferentes e precisam ser identificados corretamente para orientar a prevenção",
+          "alternativas": [
+            "Porque apenas um deles pode existir em uma comunidade",
+            "Porque todos significam exatamente a mesma coisa"
+          ],
+          "explicacao": "Os três fatores aparecem em situações diferentes. Reconhecer qual está presente ajuda a escolher uma resposta adequada."
+        }
+      ]
+    },
+    {
+      "titulo": "A reunião do bairro",
+      "personagem": "Profª Helena",
+      "x": 10,
+      "y": 7,
+      "cor": "#f77f00",
+      "perguntas": [
+        {
+          "categoria": "Segurança",
+          "pergunta": "A escola, moradores e serviços públicos se reúnem para discutir um problema de segurança no entorno do curso. O que essa reunião representa?",
+          "resposta": "Uma forma de participação social em segurança pública",
+          "alternativas": [
+            "Uma investigação criminal",
+            "Uma decisão exclusiva da polícia"
+          ],
+          "explicacao": "A comunidade pode participar de discussões e espaços de acompanhamento relacionados à segurança pública."
+        },
+        {
+          "categoria": "Segurança",
+          "pergunta": "Helena ouve: \"Segurança pública é assunto só da polícia.\" Qual é a formulação constitucional?",
+          "resposta": "A segurança pública é dever do Estado, direito e responsabilidade de todos",
+          "alternativas": [
+            "É responsabilidade exclusiva das polícias",
+            "É responsabilidade apenas das famílias"
+          ],
+          "explicacao": "O artigo 144 da Constituição Federal define a segurança pública como dever do Estado, direito e responsabilidade de todos."
+        },
+        {
+          "categoria": "Participação",
+          "pergunta": "Depois da reunião, os moradores continuam acompanhando as medidas combinadas e discutindo os resultados. Que ideia aparece aí?",
+          "resposta": "Participação e acompanhamento das ações de segurança",
+          "alternativas": [
+            "Afastamento da comunidade",
+            "Ação baseada somente em opinião individual"
+          ],
+          "explicacao": "Participação social também envolve acompanhar e discutir as ações relacionadas à segurança pública."
+        }
+      ]
+    },
+    {
+      "titulo": "O quadro de dados",
+      "personagem": "Cap. Duarte",
+      "x": 17,
+      "y": 7,
+      "cor": "#457b9d",
+      "perguntas": [
+        {
+          "categoria": "Segurança",
+          "pergunta": "No painel do Cap. Duarte, dois municípios apresentam propostas diferentes. Um usa informações sobre os problemas locais antes de definir as ações. Qual princípio do PNSP aparece nessa escolha?",
+          "resposta": "Uso de evidências para orientar o planejamento",
+          "alternativas": [
+            "Decisão sem dados",
+            "Ação baseada somente em opinião"
+          ],
+          "explicacao": "O PNSP determina que as ações estratégicas considerem evidências e parâmetros metodológicos reconhecidos."
+        },
+        {
+          "categoria": "Segurança",
+          "pergunta": "O painel mostra \"2021-2030\". O que esse período indica?",
+          "resposta": "A vigência de dez anos do Plano Nacional de Segurança Pública e Defesa Social",
+          "alternativas": [
+            "Um plano que muda todos os anos",
+            "Um plano com duração de dois anos"
+          ],
+          "explicacao": "O PNSP 2021-2030 tem duração de dez anos e é organizado em ciclos de implementação de dois anos."
+        },
+        {
+          "categoria": "Segurança",
+          "pergunta": "União, estados, Distrito Federal e municípios precisam trabalhar de forma articulada na execução das ações. Que característica do plano aparece nessa situação?",
+          "resposta": "Articulação e governança entre os entes federativos",
+          "alternativas": [
+            "Atuação isolada de cada município",
+            "Decisão exclusiva de uma instituição"
+          ],
+          "explicacao": "O PNSP orienta a articulação entre os entes federativos e a integração das ações de segurança pública."
+        },
+        {
+          "categoria": "Participação",
+          "pergunta": "A comunidade acompanha os resultados e participa dos espaços previstos para discutir a execução do plano. Que princípio aparece?",
+          "resposta": "Participação social no acompanhamento das ações",
+          "alternativas": [
+            "Ausência de controle social",
+            "Decisão sem acompanhamento"
+          ],
+          "explicacao": "O PNSP prevê participação social na governança e no acompanhamento das ações por meio dos conselhos de segurança pública e defesa social."
+        }
+      ]
+    }
+  ],
+  "final": {
+    "titulo": "A Rede",
+    "personagem": "Rosa",
+    "x": 8,
+    "y": 4,
+    "cor": "#ffd166",
+    "perguntas": [
+      {
+        "categoria": "Direitos",
+        "pergunta": "Rosa observa a escola, o curso profissional e o bairro ao redor. Crianças, jovens e pessoas idosas aparecem em situações diferentes. O que os Estatutos estudados têm em comum?",
+        "resposta": "Eles estabelecem direitos e orientam formas de proteção, políticas e serviços para grupos específicos",
+        "alternativas": [
+          "Todos tratam somente de segurança pública",
+          "Todos valem apenas para quem tem renda"
+        ],
+        "explicacao": "Cada Estatuto trata de um grupo e de seus direitos. Em comum, eles organizam proteções e orientam ações e serviços relacionados a esses direitos."
+      },
+      {
+        "categoria": "Proteção",
+        "pergunta": "Uma escola identifica uma situação em que os direitos de um adolescente podem estar sendo violados. Qual resposta está de acordo com o conteúdo estudado sobre o Conselho Tutelar?",
+        "resposta": "Acionar o Conselho para que ele atenda a situação, oriente e encaminhe ou requisite os serviços necessários",
+        "alternativas": [
+          "Esperar que a situação desapareça sozinha",
+          "Transformar o Conselho em tribunal"
+        ],
+        "explicacao": "O Conselho Tutelar atua para zelar pelos direitos de crianças e adolescentes e possui atribuições de atendimento, orientação e encaminhamento."
+      },
+      {
+        "categoria": "Prevenção",
+        "pergunta": "No bairro, a equipe encontra três situações diferentes: uma família em condição de maior exposição a riscos, uma pessoa tratada de forma desigual por sua origem e uma criança recebendo cuidados inadequados. Como essas situações podem ser classificadas?",
+        "resposta": "Vulnerabilidade, discriminação e maus-tratos",
+        "alternativas": [
+          "Participação, governança e prevenção",
+          "Segurança pública, estatuto e PNSP"
+        ],
+        "explicacao": "São três fatores de risco estudados. Identificar cada um ajuda a compreender melhor o problema e pensar em prevenção."
+      },
+      {
+        "categoria": "Segurança",
+        "pergunta": "A equipe quer planejar uma ação para o entorno da escola. Qual combinação segue a lógica estudada sobre segurança pública e PNSP?",
+        "resposta": "Observar os dados e fatores de risco, articular os responsáveis e acompanhar os resultados com participação social",
+        "alternativas": [
+          "Escolher uma ação sem analisar o problema",
+          "Deixar toda a responsabilidade para uma única instituição"
+        ],
+        "explicacao": "O conteúdo reúne três ideias importantes: prevenção baseada em informações, articulação entre diferentes responsáveis e participação no acompanhamento das ações."
+      },
+      {
+        "categoria": "Participação",
+        "pergunta": "Depois que a ação começa, os participantes voltam a se reunir para verificar o que funcionou e o que precisa ser ajustado. Por que esse acompanhamento faz parte do que foi estudado?",
+        "resposta": "Porque políticas de segurança devem ser acompanhadas e a participação social faz parte da governança",
+        "alternativas": [
+          "Porque a comunidade precisa substituir os órgãos públicos",
+          "Porque o planejamento termina quando a ação começa"
+        ],
+        "explicacao": "O PNSP prevê acompanhamento, monitoramento e participação social. A execução de uma ação não encerra o processo."
+      }
+    ]
+  }
+}

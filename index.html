@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1">
+
+<title>Caminhos da Cidadania</title>
+<meta name="description" content="Uma cidade, uma rede e as suas escolhas. Explore, decida e descubra os caminhos da cidadania.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#070910">
+<meta name="format-detection" content="telephone=no">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+
+<!-- Web App / iOS -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Caminhos">
+
+<!-- Compartilhamento social (ajuste as URLs das imagens) -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Caminhos da Cidadania">
+<meta property="og:title" content="Caminhos da Cidadania">
+<meta property="og:description" content="Uma cidade. Uma rede. Suas escolhas.">
+<meta property="og:image" content="og-cover.png">
+<meta property="og:image:alt" content="Logo do jogo Caminhos da Cidadania">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Caminhos da Cidadania">
+<meta name="twitter:description" content="Uma cidade. Uma rede. Suas escolhas.">
+<meta name="twitter:image" content="og-cover.png">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E⚡%3C/text%3E%3C/svg%3E">
+
+<!-- Fontes -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap">
+
+<!-- CSS do jogo -->
+<link rel="stylesheet" href="style.css">
+
+<style>
+  /* Atalho de acessibilidade: invisível até receber foco pelo teclado. */
+  .skip-link{
+    position:absolute; top:0; left:-9999px; z-index:9999;
+    padding:.75rem 1rem; background:#070910; color:#fff;
+    font:1rem/1.2 system-ui,sans-serif; border-radius:0 0 .5rem 0;
+  }
+  .skip-link:focus{ left:0; outline:2px solid currentColor; }
+
+  /* Aviso exibido quando o JavaScript está desativado. */
+  .noscript{
+    position:fixed; inset:0; z-index:10000;
+    display:grid; place-items:center; padding:2rem;
+    background:#070910; color:#fff;
+    font:1rem/1.5 system-ui,sans-serif; text-align:center;
+  }
+</style>
+</head>
+<body>
+
+<!-- Atalho para quem navega por teclado ou leitor de tela -->
+<a class="skip-link" href="#app">Pular a abertura e ir para o jogo</a>
+
+<!-- ==================== PALCO DE ABERTURA ==================== -->
+<section id="theater" aria-label="Palco de abertura">
+
+  <canvas id="thc" aria-hidden="true"></canvas>
+
+  <div id="thLoad" role="status" aria-live="polite">
+    <div class="kicker">Carregando...</div>
+    <div class="thbar" aria-hidden="true"><i></i></div>
+  </div>
+
+  <div class="th-tools">
+    <button type="button" id="thFs" title="Tela inteira" aria-label="Alternar tela inteira">⛶</button>
+    <button type="button" id="thSnd" title="Som" aria-label="Ligar ou desligar o som">🔊</button>
+  </div>
+
+  <div class="th-ui">
+    <header class="th-title">
+      <div class="kicker">SENAI · ENERGISA</div>
+      <h1>CAMINHOS<br>DA CIDADANIA</h1>
+      <div class="titleSub">UMA CIDADE. UMA REDE. SUAS ESCOLHAS.</div>
+    </header>
+
+    <div id="thSpot"></div>
+
+    <nav class="th-menu" id="thMenu" aria-label="Menu principal"></nav>
+  </div>
+
+  <div id="thSkip" aria-hidden="true">TOQUE PARA PULAR ▸</div>
+
+  <div id="thModal" hidden role="dialog" aria-modal="true" aria-label="Aviso"></div>
+</section>
+
+<!-- ==================== JOGO ==================== -->
+<main id="app">
+
+  <header id="top">
+    <div id="hud"><span id="hi"></span></div>
+    <button type="button" id="fs" class="topbtn" title="Tela inteira" aria-label="Alternar tela inteira">⛶</button>
+    <!-- o handler inline depende da função global snd() definida no módulo do jogo -->
+    <button type="button" id="snd" title="Som" aria-label="Ligar ou desligar o som" onclick="snd()">🔊</button>
+  </header>
+
+  <div class="stage" id="st">
+    <canvas id="c" width="640" height="384" aria-hidden="true"></canvas>
+    <!-- Se o overlay contiver só texto de diálogo, o aria-live abaixo ajuda leitores de tela. -->
+    <div id="ov" aria-live="polite"></div>
+  </div>
+
+  <div id="pad" role="group" aria-label="Controles direcionais">
+    <span aria-hidden="true"></span>
+    <button type="button" data-k="ArrowUp" aria-label="Mover para cima">▲</button>
+    <span aria-hidden="true"></span>
+    <button type="button" data-k="ArrowLeft" aria-label="Mover para a esquerda">◀</button>
+    <button type="button" data-k="ArrowDown" aria-label="Mover para baixo">▼</button>
+    <button type="button" data-k="ArrowRight" aria-label="Mover para a direita">▶</button>
+  </div>
+
+</main>
+
+<noscript>
+  <div class="noscript">
+    <p>Este jogo precisa de JavaScript ativado para funcionar.<br>
+       Ative o JavaScript no seu navegador e recarregue a página.</p>
+  </div>
+</noscript>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

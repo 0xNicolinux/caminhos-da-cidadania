@@ -1,0 +1,1275 @@
+/* ============================================================
+   CAMINHOS DA CIDADANIA — CLASSIC AMERICAN ARCADE
+   Estilo: fliperama americano anos 80/90 (Pac-Man, Galaga, SF2)
+
+   Organização:
+     @layer reset   → base neutra
+     @layer tokens  → design tokens (cores, tipografia, medidas)
+     (unlayered)    → estilos do jogo (maior prioridade de cascade)
+   ============================================================ */
+
+@layer reset, tokens;
+
+
+/* ============================================================
+   1. RESET (menor prioridade — pode ser sobrescrito por tudo)
+   ============================================================ */
+@layer reset {
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    width: 100%;
+    min-height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  img, canvas, svg, video {
+    display: block;
+    max-width: 100%;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  ul, ol, nav ul { list-style: none; }
+
+  /* Não removemos focus outline aqui: usamos :focus-visible */
+  button:focus { outline: none; }
+}
+
+
+/* ============================================================
+   2. TOKENS
+   ============================================================ */
+@layer tokens {
+  :root {
+    color-scheme: dark;
+
+    /* Dimensões do gabinete */
+    --cab-w: min(94vw, 900px);
+    --cab-h: min(96dvh, 1180px);
+    --marquee-h: 92px;
+    --base-h: 56px;
+    --bezel-pad: 20px;
+    --gap: 10px;
+
+    /* Madeira (painéis laterais) */
+    --wood-hi: #8a5a2b;
+    --wood:    #5c3818;
+    --wood-mid:#3d240e;
+    --wood-lo: #1f1206;
+    --wood-deep:#0a0503;
+
+    /* Painéis frontais */
+    --panel:    #0a0a0a;
+    --panel-hi: #1e1e1e;
+    --panel-lo: #000;
+
+    /* T-molding */
+    --tmold:    #ffcc00;
+    --tmold-hi: #ffe066;
+    --tmold-lo: #8a6d00;
+
+    /* Neons */
+    --neon-red:       #ff2040;
+    --neon-red-hi:    #ff6070;
+    --neon-red-lo:    #6a0818;
+    --neon-blue:      #0070ff;
+    --neon-blue-hi:   #5aa0ff;
+    --neon-blue-lo:   #002050;
+    --neon-yellow:    #ffcc00;
+    --neon-yellow-hi: #ffe066;
+    --neon-yellow-lo: #7a5c00;
+    --neon-green:     #39ff14;
+    --neon-pink:      #ff2b8f;
+
+    /* Texto */
+    --tx:     #fff4dc;
+    --tx-dim: #c9b8a0;
+    --ink:    #05030a;
+    --ink2:   #0d0718;
+
+    /* Tipografia */
+    --f-pixel: "Press Start 2P", monospace;
+    --f-body:  "VT323", "Courier New", monospace;
+    --fs-body:  clamp(16px, 1.7vw, 20px);
+    --fs-h1:    clamp(18px, 2.6vw, 32px);
+    --fs-h3:    clamp(10px, 1.1vw, 14px);
+    --fs-small: clamp(7px,  0.9vw, 10px);
+
+    /* Safe areas (iOS/Android) */
+    --sa-t: env(safe-area-inset-top,    0px);
+    --sa-b: env(safe-area-inset-bottom, 0px);
+    --sa-l: env(safe-area-inset-left,   0px);
+    --sa-r: env(safe-area-inset-right,  0px);
+  }
+}
+
+
+/* ============================================================
+   3. AMBIENTE — SALÃO DE ARCADE ESCURO
+   ============================================================ */
+body {
+  background:
+    radial-gradient(ellipse at 50% 40%,
+      #2a0a1a 0%, #10050c 40%, #050205 70%, #000 100%);
+  background-color: #000;
+  color: var(--tx);
+  font: var(--fs-body) / 1.3 var(--f-body);
+  display: grid;
+  place-items: center;
+  padding:
+    calc(var(--sa-t) + 8px)
+    calc(var(--sa-r) + 8px)
+    calc(var(--sa-b) + 8px)
+    calc(var(--sa-l) + 8px);
+}
+
+/* Neons distantes do salão (outras máquinas) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 10% 15%, rgba(255, 32, 64, .3)  0%, transparent 7%),
+    radial-gradient(circle at 90% 20%, rgba(255, 204, 0, .22) 0%, transparent 6%),
+    radial-gradient(circle at 15% 85%, rgba(0, 112, 255, .2)  0%, transparent 6%),
+    radial-gradient(circle at 88% 80%, rgba(255, 43, 143, .22) 0%, transparent 6%),
+    radial-gradient(circle at 50% 6%,  rgba(255, 32, 64, .15) 0%, transparent 10%);
+  filter: blur(28px);
+}
+
+/* Vinheta profunda */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(ellipse at center, transparent 20%, rgba(0, 0, 0, .8) 100%);
+}
+
+
+/* ============================================================
+   4. GABINETE (#app) — MADEIRA MACIÇA + PAINEL PRETO
+   ============================================================ */
+#app {
+  position: relative;
+  z-index: 2;
+  width: var(--cab-w);
+  height: var(--cab-h);
+  max-height: calc(100dvh - 16px);
+  max-height: calc(100svh - 16px); /* fallback em navegadores sem dvh */
+
+  background:
+    /* veios verticais da madeira */
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 48px,
+      rgba(0, 0, 0, .12) 48px 50px,
+      transparent 50px 96px,
+      rgba(255, 255, 255, .03) 96px 98px
+    ),
+    /* gradiente de profundidade */
+    linear-gradient(180deg,
+      var(--wood-hi)  0%,
+      var(--wood)     25%,
+      var(--wood-mid) 70%,
+      var(--wood-lo)  100%);
+
+  border: 3px solid var(--wood-deep);
+  border-radius: 24px 24px 10px 10px;
+
+  box-shadow:
+    0 0 0 4px var(--tmold-lo),
+    0 0 0 6px var(--tmold),
+    0 0 0 7px #000,
+    0 24px 60px  rgba(0, 0, 0, .9),
+    0 50px 130px rgba(255, 32, 64, .08),
+    inset 0 4px 0  rgba(255, 255, 255, .08),
+    inset 0 -8px 0 rgba(0, 0, 0, .75),
+    inset 0 0 90px rgba(0, 0, 0, .55);
+
+  padding:
+    calc(var(--marquee-h) + 10px)
+    var(--bezel-pad)
+    calc(var(--base-h) + 10px);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  isolation: isolate;
+}
+
+/* ---------- 4a. Marquee iluminada (topo) ---------- */
+#app::before {
+  content: "CAMINHOS DA CIDADANIA";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: var(--marquee-h);
+
+  background:
+    repeating-linear-gradient(90deg, transparent 0 26px, rgba(255, 204, 0, .06) 26px 28px),
+    repeating-linear-gradient(0deg,  transparent 0 26px, rgba(255, 204, 0, .06) 26px 28px),
+    radial-gradient(ellipse at 50% 65%, rgba(255, 204, 0, .45) 0%, transparent 65%),
+    linear-gradient(180deg, #1a0a05 0%, #3a1008 25%, #6a1810 55%, #3a1008 85%, #1a0a05 100%);
+
+  border-bottom: 4px solid var(--tmold-lo);
+  border-radius: 22px 22px 0 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--neon-yellow-hi);
+  font: var(--fs-h1) / 1 var(--f-pixel);
+  letter-spacing: clamp(2px, .6vw, 6px);
+  padding: 0 24px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+
+  text-shadow:
+    0 0 8px  var(--neon-yellow),
+    0 0 20px var(--neon-red),
+    0 0 40px var(--neon-red-lo),
+    3px 3px 0 #000,
+    -2px -2px 0 #000,
+    4px 0 0 rgba(255, 32, 64, .6),
+    -3px 0 0 rgba(0, 112, 255, .5);
+
+  box-shadow:
+    inset 0 -24px 50px rgba(0, 0, 0, .75),
+    inset 0 6px 24px  rgba(255, 204, 0, .3),
+    0 8px 0 #000;
+
+  z-index: 3;
+  animation: marqueeGlow 4s ease-in-out infinite;
+}
+
+@keyframes marqueeGlow {
+  0%, 100% {
+    text-shadow:
+      0 0 8px  var(--neon-yellow),
+      0 0 20px var(--neon-red),
+      0 0 40px var(--neon-red-lo),
+      3px 3px 0 #000,
+      -2px -2px 0 #000,
+      4px 0 0 rgba(255, 32, 64, .6),
+      -3px 0 0 rgba(0, 112, 255, .5);
+  }
+  50% {
+    text-shadow:
+      0 0 16px var(--neon-yellow),
+      0 0 32px var(--neon-red),
+      0 0 60px var(--neon-red-lo),
+      3px 3px 0 #000,
+      -2px -2px 0 #000,
+      4px 0 0 rgba(255, 32, 64, .9),
+      -3px 0 0 rgba(0, 112, 255, .8);
+  }
+}
+
+/* ---------- 4b. Base do gabinete ---------- */
+#app::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: var(--base-h);
+
+  background:
+    repeating-linear-gradient(90deg, transparent 0 34px, rgba(0, 0, 0, .18) 34px 36px),
+    linear-gradient(180deg, var(--wood) 0%, var(--wood-lo) 55%, #000 100%);
+
+  border-top: 3px solid var(--tmold-lo);
+  border-radius: 0 0 8px 8px;
+
+  box-shadow:
+    inset 0 8px 22px rgba(0, 0, 0, .75),
+    inset 0 -4px 0 rgba(255, 255, 255, .05),
+    0 10px 0 #000;
+
+  z-index: 3;
+}
+
+
+/* ============================================================
+   5. TOPO — ALTO-FALANTES + HUD
+   ============================================================ */
+#top {
+  position: relative;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 96px;
+  background: linear-gradient(180deg, var(--panel-hi) 0%, var(--panel) 50%, var(--panel-lo) 100%);
+  border: 2px solid var(--tmold-lo);
+  border-radius: 4px;
+  box-shadow:
+    0 6px 0 #000,
+    inset 0 2px 0 rgba(255, 255, 255, .08),
+    inset 0 -4px 0 rgba(0, 0, 0, .8);
+  flex: 0 0 auto;
+}
+
+/* Alto-falantes (grade pontilhada) */
+#top::before,
+#top::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, #000 0%, #0a0a0a 30%, #000 100%),
+    repeating-radial-gradient(circle at 50% 50%,
+      transparent 0 2px, rgba(255, 255, 255, .05) 2px 3px),
+    repeating-linear-gradient(0deg,
+      transparent 0 4px, rgba(255, 255, 255, .08) 4px 5px);
+  background-size: 100%, 100%, 100%;
+  border: 3px solid var(--tmold-lo);
+  box-shadow:
+    inset 0 0 16px #000,
+    inset 0 2px 6px rgba(255, 255, 255, .1),
+    0 0 14px rgba(255, 32, 64, .35),
+    0 4px 0 #000;
+}
+#top::before { left: 14px; }
+#top::after  { right: 14px; }
+
+/* Display verde-fósforo do HUD */
+#hud {
+  flex: 1;
+  min-width: 0;
+  font: var(--fs-small) / 1.8 var(--f-pixel);
+  background: linear-gradient(180deg, #0a0a0a 0%, #101a10 100%);
+  color: var(--neon-green);
+  border: 2px solid var(--tmold-lo);
+  border-radius: 3px;
+  padding: 8px 10px;
+  box-shadow:
+    inset 0 2px 8px  rgba(0, 0, 0, .9),
+    inset 0 0 24px   rgba(57, 255, 20, .08),
+    0 3px 0 #000;
+  text-shadow:
+    0 0 4px var(--neon-green),
+    0 0 8px rgba(57, 255, 20, .5);
+  position: relative;
+  overflow: hidden;
+}
+
+#hud b {
+  color: var(--neon-yellow);
+  text-shadow: 0 0 6px var(--neon-yellow);
+}
+
+/* Botoeiras do gabinete */
+.topbtn,
+#snd {
+  width: 48px;
+  height: 48px;
+  font-size: 18px;
+  text-align: center;
+  padding: 0;
+  border: 2px solid var(--tmold-lo);
+  background: radial-gradient(circle at 35% 30%,
+    var(--panel-hi) 0%, var(--panel) 60%, var(--panel-lo) 100%);
+  color: var(--tx);
+  border-radius: 50%;
+  font-family: var(--f-pixel);
+  display: grid;
+  place-items: center;
+  box-shadow:
+    0 4px 0 #000,
+    inset 0 2px 0 rgba(255, 255, 255, .2),
+    inset 0 -3px 0 rgba(0, 0, 0, .7);
+  transition: transform .08s steps(2), background .1s;
+}
+
+.topbtn:hover,
+#snd:hover,
+.topbtn:focus-visible,
+#snd:focus-visible {
+  background: radial-gradient(circle at 35% 30%,
+    var(--neon-yellow-hi) 0%, var(--neon-yellow) 60%, var(--neon-yellow-lo) 100%);
+  color: var(--ink);
+}
+
+.topbtn:active,
+#snd:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 #000, inset 0 0 12px rgba(0, 0, 0, .8);
+}
+
+
+/* ============================================================
+   6. MONITOR (.stage)
+   ============================================================ */
+.stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  background: #000;
+  border: 10px solid var(--panel);
+  border-radius: 22px;
+  box-shadow:
+    0 0 0 2px #000,
+    0 0 0 5px var(--wood-mid),
+    0 0 0 8px var(--tmold-lo),
+    0 0 0 10px #000,
+    0 10px 0 #000,
+    0 0 80px rgba(0, 112, 255, .18),
+    inset 0 0 50px  rgba(0, 0, 0, .95),
+    inset 0 0 100px rgba(0, 112, 255, .05);
+  overflow: hidden;
+  touch-action: none;
+}
+
+/* Canvas — pixel art nítida em todos os navegadores */
+canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: -moz-crisp-edges; /* Firefox legado */
+  image-rendering: crisp-edges;      /* padrão antigo */
+  image-rendering: pixelated;        /* moderno (Chrome/Safari/Firefox atuais) */
+}
+
+/* Tremor de tela (impactos) */
+.stage.sh { animation: sh .4s steps(4); }
+@keyframes sh {
+  20% { transform: translate(-8px,  2px); }
+  40% { transform: translate( 8px, -2px); }
+  60% { transform: translate(-5px,  0);   }
+  80% { transform: translate( 5px,  0);   }
+}
+
+
+/* ============================================================
+   7. OVERLAY DE JOGO (#ov)
+   ============================================================ */
+#ov {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  overflow: auto;
+  background: linear-gradient(180deg, rgba(5, 3, 10, .94), rgba(13, 7, 24, .98));
+  border: 2px solid var(--neon-blue-lo);
+  border-radius: 14px;
+  padding: 16px;
+  color: var(--tx);
+  font: 400 clamp(16px, 1.7vw, 20px) / 1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  animation: ovIn .35s steps(5);
+  box-shadow:
+    inset 0 0 60px rgba(0, 112, 255, .08),
+    inset 0 0 20px rgba(0, 0, 0, .9);
+
+  /* Scrollbar fina em navegadores modernos */
+  scrollbar-width: thin;
+  scrollbar-color: var(--neon-yellow) var(--ink);
+}
+
+#ov.on { display: block; }
+
+#ov.full {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  background: repeating-linear-gradient(135deg, #1a0a1a 0 8px, #150618 8px 16px);
+}
+#ov.full > * { animation: ovIn .4s steps(6); }
+
+@keyframes ovIn {
+  from { transform: translateY(20px); opacity: 0; }
+}
+
+#ov p { margin: 8px 0; }
+
+/* Scrollbar estilo retro (WebKit) */
+#ov::-webkit-scrollbar { width: 10px; }
+#ov::-webkit-scrollbar-track { background: var(--ink); }
+#ov::-webkit-scrollbar-thumb {
+  background: var(--neon-yellow);
+  border: 2px solid var(--ink);
+}
+
+
+/* ============================================================
+   8. PAINEL DE CONTROLE (#pad)
+   ============================================================ */
+#pad {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 66px);
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  padding: 16px 96px;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(255, 255, 255, .05), transparent 60%),
+    linear-gradient(180deg, var(--panel-hi) 0%, var(--panel) 55%, var(--panel-lo) 100%);
+  border: 2px solid var(--tmold-lo);
+  border-radius: 6px;
+  box-shadow:
+    0 8px 0 #000,
+    inset 0 2px 0 rgba(255, 255, 255, .08),
+    inset 0 -6px 0 rgba(0, 0, 0, .7);
+  flex: 0 0 auto;
+  margin-top: 6px;
+}
+
+/* Haste do joystick */
+#pad::before {
+  content: "";
+  position: absolute;
+  left: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 70px;
+  background: linear-gradient(90deg,
+    #0a0a0a 0%, #2a2a2a 30%, #444 50%, #2a2a2a 70%, #0a0a0a 100%);
+  border-radius: 12px 12px 4px 4px;
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, .2),
+    inset 0 -3px 6px rgba(0, 0, 0, .9),
+    0 4px 0 #000,
+    0 0 14px rgba(255, 32, 64, .4);
+}
+
+/* Bola do joystick */
+#pad::after {
+  content: "";
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 56px;
+  height: 56px;
+  background: radial-gradient(circle at 35% 30%,
+    #ff5060 0%, #ff2040 40%, #8a0820 100%);
+  border: 2px solid #000;
+  border-radius: 50%;
+  box-shadow:
+    inset -6px -6px 12px rgba(0, 0, 0, .55),
+    inset 6px 6px 12px rgba(255, 255, 255, .2),
+    0 6px 0 #000,
+    0 0 26px var(--neon-red);
+}
+
+/* Em desktop com mouse, esconde o pad */
+@media (hover: hover) and (min-width: 900px) {
+  #pad { display: none; }
+}
+
+
+/* ============================================================
+   9. TIPOGRAFIA
+   ============================================================ */
+h1 {
+  font: var(--fs-h1) / 1.4 var(--f-pixel);
+  color: var(--neon-yellow);
+  margin: 0;
+  letter-spacing: 1px;
+  text-wrap: balance;
+  text-shadow:
+    3px 0 var(--neon-red),
+    -3px 0 var(--neon-blue),
+    4px 4px 0 #000,
+    0 0 30px var(--neon-yellow);
+  animation: drop .9s cubic-bezier(.3, 1.6, .5, 1);
+}
+@keyframes drop {
+  from { transform: translateY(-70px); opacity: 0; }
+}
+
+h3 {
+  font: var(--fs-h3) / 1.7 var(--f-pixel);
+  color: var(--neon-yellow);
+  margin: 0;
+  text-wrap: balance;
+  text-shadow: 2px 2px 0 #000;
+}
+h3.ok { color: var(--neon-green);   text-shadow: 0 0 12px var(--neon-green),   2px 2px 0 #000; }
+h3.no { color: var(--neon-red-hi);  text-shadow: 0 0 12px var(--neon-red-hi),  2px 2px 0 #000; }
+
+small { opacity: .75; }
+
+
+/* ============================================================
+   10. BOTÕES
+   ============================================================ */
+button {
+  font: var(--fs-small) / 1.6 var(--f-pixel);
+  color: var(--tx);
+  background: linear-gradient(180deg, var(--panel-hi) 0%, var(--panel) 50%, var(--panel-lo) 100%);
+  border: 2px solid var(--tmold-lo);
+  padding: 10px 14px;
+  text-align: left;
+  border-radius: 4px;
+  box-shadow:
+    0 4px 0 #000,
+    inset 0 2px 0 rgba(255, 255, 255, .1),
+    inset 0 -3px 0 rgba(0, 0, 0, .7);
+  transition: transform .08s steps(2), background .1s;
+}
+
+#ov button {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  font: 600 16px / 1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+button:hover,
+button:focus-visible {
+  background: linear-gradient(180deg, var(--neon-yellow-hi), var(--neon-yellow));
+  color: var(--ink);
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 0 #000,
+    inset 0 2px 0 rgba(255, 255, 255, .3);
+}
+
+button:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #000;
+}
+
+button b {
+  color: var(--neon-yellow);
+  margin-right: 6px;
+  font-weight: 400;
+}
+button:hover b,
+button:focus-visible b { color: var(--ink); }
+
+/* Botão "grande" — CTA principal */
+.big {
+  background: radial-gradient(circle at 50% 30%,
+    var(--neon-red-hi) 0%, var(--neon-red) 50%, var(--neon-red-lo) 100%);
+  color: #fff;
+  border-color: var(--neon-yellow);
+  text-align: center;
+  font-size: clamp(12px, 1.6vw, 16px);
+  padding: 14px;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, .6);
+  box-shadow:
+    0 6px 0 #4a0818,
+    0 6px 0 2px #000,
+    inset 0 3px 0 rgba(255, 255, 255, .35),
+    inset 0 -4px 0 rgba(0, 0, 0, .45);
+}
+.big:hover,
+.big:focus-visible {
+  background: radial-gradient(circle at 50% 30%,
+    var(--neon-yellow-hi) 0%, var(--neon-yellow) 60%, var(--neon-yellow-lo) 100%);
+  color: var(--ink);
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, .4);
+}
+
+
+/* ============================================================
+   11. PAINÉIS, CARDS, CONTEÚDO
+   ============================================================ */
+.kicker {
+  font: var(--fs-small) / 1.7 var(--f-pixel);
+  color: var(--neon-blue-hi);
+  letter-spacing: 2px;
+}
+
+.titleSub {
+  font: clamp(9px, 1.1vw, 12px) / 1.8 var(--f-pixel);
+  color: var(--neon-yellow);
+  opacity: .9;
+}
+
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.feature {
+  border: 2px solid var(--neon-blue-lo);
+  background: linear-gradient(180deg, rgba(0, 112, 255, .08), rgba(0, 0, 0, .4));
+  padding: 10px;
+  text-align: center;
+  border-radius: 4px;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .05);
+}
+
+.feature b {
+  display: block;
+  color: var(--neon-yellow);
+  font: 9px / 1.6 var(--f-pixel);
+  margin-bottom: 4px;
+}
+
+/* Dica */
+.tip {
+  border-left: 4px solid var(--neon-blue-hi);
+  background: rgba(0, 112, 255, .08);
+  padding: 10px 14px;
+  border-radius: 3px;
+  font-size: var(--fs-body);
+}
+
+/* Painel de créditos */
+.creditsPanel {
+  margin-top: 16px;
+  border: 2px solid var(--tmold-lo);
+  background: linear-gradient(180deg, rgba(255, 204, 0, .06), rgba(0, 0, 0, .5));
+  box-shadow: 0 6px 0 #000, inset 0 2px 0 rgba(255, 255, 255, .05);
+  padding: 14px;
+  border-radius: 4px;
+}
+.creditsTitle {
+  font: var(--fs-small) / 1.7 var(--f-pixel);
+  color: var(--neon-yellow);
+  margin-bottom: 8px;
+}
+#ov .creditsPanel { font-size: var(--fs-body); }
+
+/* Equipe */
+.teamGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+}
+.teamMember {
+  background: rgba(0, 0, 0, .5);
+  border: 2px solid rgba(255, 204, 0, .25);
+  padding: 10px 6px;
+  text-align: center;
+  border-radius: 3px;
+}
+.teamMember b {
+  display: block;
+  color: var(--neon-yellow);
+  font: 8px / 1.5 var(--f-pixel);
+  white-space: normal;
+}
+.teamMember span {
+  display: block;
+  font-size: 16px;
+  line-height: 1.15;
+  margin-top: 4px;
+  color: var(--tx);
+}
+
+/* Parceiros */
+.partners {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 9px;
+}
+.partner {
+  background: #fff;
+  border: 2px solid rgba(0, 0, 0, .4);
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 3px;
+  box-shadow: 0 4px 0 #000;
+}
+.partner img {
+  display: block;
+  max-width: 100%;
+  max-height: 60px;
+  object-fit: contain;
+}
+
+.classLine {
+  font: var(--fs-small) / 1.7 var(--f-pixel);
+  color: var(--tx);
+  opacity: .85;
+  margin-top: 8px;
+}
+
+.neon {
+  color: var(--neon-yellow);
+  text-shadow: 0 0 8px var(--neon-yellow), 0 0 16px var(--neon-red);
+}
+
+.who { display: flex; gap: 12px; align-items: center; }
+
+.pt {
+  width: 56px;
+  height: 78px;
+  image-rendering: pixelated;
+  flex: none;
+  display: block;
+  margin-bottom: 6px;
+  filter: drop-shadow(3px 3px 0 #000);
+}
+.who .pt { margin: 0; width: 40px; height: 56px; }
+
+/* Barra de progresso */
+.bar {
+  background: #05030a;
+  height: 12px;
+  border: 2px solid var(--neon-blue-lo);
+  margin: 10px 0 4px;
+  border-radius: 2px;
+  box-shadow: inset 2px 2px 0 #000;
+  overflow: hidden;
+}
+.bar i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, var(--neon-green), var(--neon-blue-hi));
+  box-shadow: 0 0 12px var(--neon-green);
+  transition: width .4s steps(8);
+}
+
+.two {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+.two button { margin: 0 !important; }
+
+/* ============================================================
+   12. TEATRO (INTRO)
+   ============================================================ */
+#theater {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: #0d0718;
+  overflow: hidden;
+  font: var(--fs-body) / 1.3 var(--f-body);
+  color: var(--tx);
+  --val: 40px;
+}
+#theater.off { display: none; }
+
+#thc {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  display: block;
+}
+
+#thLoad {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: repeating-linear-gradient(135deg, #1a0a1a 0 6px, #150618 6px 12px);
+  z-index: 5;
+}
+#theater:not(.p0) #thLoad { display: none; }
+
+.thbar {
+  width: min(260px, 70vw);
+  height: 18px;
+  border: 3px solid var(--neon-yellow);
+  padding: 2px;
+  border-radius: 3px;
+  box-shadow: 0 0 20px var(--neon-yellow-lo), inset 0 0 8px #000;
+}
+.thbar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--neon-red), var(--neon-yellow));
+  box-shadow: 0 0 8px var(--neon-yellow);
+  animation: load .7s steps(10) forwards;
+}
+@keyframes load { to { width: 100%; } }
+
+.th-ui {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--val) + 10px) 14px max(12px, var(--sa-b));
+  z-index: 3;
+  pointer-events: none;
+}
+.th-ui > * { pointer-events: auto; }
+
+.th-title { text-align: center; opacity: 0; }
+.th-title h1 {
+  font-size: clamp(16px, 4vw, 40px);
+  line-height: 1.4;
+  margin: 6px 0;
+}
+.th-title .titleSub {
+  font: clamp(8px, 1.3vw, 12px) / 1.8 var(--f-pixel);
+  color: var(--tx);
+}
+
+#theater.p5 .th-title,
+#theater.p6 .th-title {
+  opacity: 1;
+  animation: thDrop .7s steps(7);
+}
+@keyframes thDrop {
+  0%  { transform: translateY(-60px); opacity: 0; }
+  70% { transform: translateY(6px); }
+}
+
+#thSpot {
+  flex: 0 1 auto;
+  min-height: 110px;
+  height: 30vh;
+  width: 100%;
+  pointer-events: none;
+}
+
+.th-menu {
+  width: min(460px, 100%);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  opacity: 0;
+  visibility: hidden;
+}
+#theater.p6 .th-menu {
+  opacity: 1;
+  visibility: visible;
+  animation: thUp .5s steps(5);
+}
+@keyframes thUp {
+  from { transform: translateY(40px); opacity: 0; }
+}
+
+.th-menu .big {
+  font: clamp(11px, 1.7vw, 15px) / 1.4 var(--f-pixel);
+  text-align: center;
+  padding: 16px 12px;
+  animation: pulse 1.6s steps(2) infinite;
+}
+@keyframes pulse {
+  50% { filter: brightness(1.15); }
+}
+
+.th-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.th-row button {
+  text-align: center;
+  font-size: 18px;
+  padding: 8px;
+}
+
+.th-sponsors {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 2px;
+}
+.th-sponsors small {
+  font: 8px / 1.4 var(--f-pixel);
+  color: var(--neon-yellow);
+  opacity: .9;
+}
+.th-sponsors span {
+  background: #fff;
+  padding: 4px 8px;
+  border: 3px solid var(--ink);
+  box-shadow: 0 0 0 2px var(--neon-yellow), 0 4px 0 2px #000;
+  display: flex;
+}
+.th-sponsors img {
+  height: 26px;
+  max-width: 110px;
+  object-fit: contain;
+  display: block;
+}
+
+.th-tools {
+  position: absolute;
+  top: calc(var(--val) + 8px);
+  right: 10px;
+  display: flex;
+  gap: 6px;
+  z-index: 4;
+}
+.th-tools button {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  text-align: center;
+  font-size: 20px;
+}
+
+#thSkip {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  z-index: 4;
+  font: 8px var(--f-pixel);
+  color: var(--tx);
+  opacity: .7;
+  animation: pulse 1s steps(2) infinite;
+}
+#theater.p6 #thSkip { display: none; }
+
+
+/* ============================================================
+   13. MODAL DE CRÉDITOS
+   ============================================================ */
+#thModal {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  background: rgba(13, 7, 24, .9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+}
+#thModal[hidden] { display: none; }
+
+#thModal .box {
+  width: min(720px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  background: linear-gradient(180deg, rgba(26, 10, 26, .95), rgba(13, 7, 24, .98));
+  border: 4px solid var(--neon-yellow);
+  box-shadow:
+    0 0 0 4px #000,
+    0 10px 0 4px #000,
+    0 0 40px rgba(255, 32, 64, .3);
+  padding: 16px;
+  border-radius: 4px;
+  animation: thUp .4s steps(5);
+  scrollbar-width: thin;
+  scrollbar-color: var(--neon-yellow) var(--ink);
+}
+#thModal .box::-webkit-scrollbar { width: 10px; }
+#thModal .box::-webkit-scrollbar-track { background: var(--ink); }
+#thModal .box::-webkit-scrollbar-thumb {
+  background: var(--neon-yellow);
+  border: 2px solid var(--ink);
+}
+#thModal p { margin: 8px 0; }
+
+
+/* ============================================================
+   14. MODO IMERSIVO (FULLSCREEN)
+   ============================================================ */
+body.immersive {
+  background: #000;
+  padding: 0;
+}
+body.immersive #app {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  border-radius: 0;
+  border: 0;
+  box-shadow: none;
+  padding: calc(var(--sa-t) + 6px) 6px calc(var(--sa-b) + 6px);
+  gap: 6px;
+  z-index: 9999;
+  background: #000;
+}
+body.immersive #app::before,
+body.immersive #app::after { display: none; }
+body.immersive .stage {
+  border-width: 4px;
+  border-radius: 12px;
+}
+body.immersive #top { padding: 6px 8px; }
+body.immersive #pad {
+  position: fixed;
+  left: calc(var(--sa-l) + 14px);
+  bottom: calc(var(--sa-b) + 14px);
+  margin: 0;
+  z-index: 20;
+  padding: 8px 72px;
+}
+
+
+/* ============================================================
+   15. MEDIA QUERIES
+   ============================================================ */
+@media (max-width: 900px) {
+  #pad { display: grid !important; }
+}
+
+@media (max-width: 700px) {
+  :root {
+    --marquee-h: 62px;
+    --base-h: 38px;
+    --bezel-pad: 10px;
+  }
+  #app {
+    border-radius: 18px 18px 8px 8px;
+    border-width: 2px;
+  }
+  #app::before {
+    font-size: clamp(10px, 2.6vw, 15px);
+    letter-spacing: 1.5px;
+    padding: 0 12px;
+  }
+  #top { padding: 8px 62px; gap: 6px; }
+  #top::before,
+  #top::after { width: 44px; height: 44px; }
+  .topbtn,
+  #snd { width: 38px; height: 38px; font-size: 14px; }
+  #hud { font-size: var(--fs-small); padding: 6px 8px; }
+  .stage { border-width: 6px; border-radius: 14px; }
+  .featureGrid { grid-template-columns: 1fr; }
+  .feature { padding: 7px; }
+  .teamGrid { grid-template-columns: 1fr 1fr; }
+  .partners { grid-template-columns: 1fr 1fr; }
+  .two { grid-template-columns: 1fr; }
+  h1 { font-size: clamp(14px, 3.6vw, 22px); }
+  #pad {
+    grid-template-columns: repeat(3, 54px);
+    padding: 8px 72px;
+  }
+  #pad::before { left: 28px; height: 52px; width: 14px; }
+  #pad::after  { left: 14px; width: 40px; height: 40px; }
+}
+
+@media (max-width: 440px) {
+  .partner { min-height: 60px; }
+  .partner img { max-height: 44px; }
+  #pad {
+    grid-template-columns: repeat(3, 48px);
+    gap: 4px;
+    padding: 8px 62px;
+  }
+  #pad button { padding: 8px 0; font-size: 20px; }
+  #pad::before { left: 22px; height: 44px; width: 12px; }
+  #pad::after  { left: 10px; width: 34px; height: 34px; }
+  #top::before,
+  #top::after { width: 34px; height: 34px; }
+  #top { padding: 6px 48px; }
+}
+
+@media (max-height: 600px) {
+  :root {
+    --marquee-h: 52px;
+    --base-h: 32px;
+  }
+  #app::before { font-size: clamp(10px, 2vw, 14px); }
+  #top::before,
+  #top::after { width: 38px; height: 38px; }
+}
+
+@media (max-height: 480px) and (orientation: landscape) {
+  .th-title h1 { font-size: 16px; margin: 2px 0; }
+  .th-title .kicker,
+  .th-title .titleSub { display: none; }
+  .th-menu {
+    width: min(640px, 100%);
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 6px;
+  }
+  .th-menu .big { padding: 10px; }
+  .th-sponsors { grid-column: 1 / -1; }
+  .th-sponsors img { height: 18px; }
+  #thSpot { min-height: 80px; }
+}
+
+
+/* ============================================================
+   16. ACESSIBILIDADE
+   ============================================================ */
+
+/* Foco visível consistente (apenas teclado) */
+button:focus-visible,
+.th-menu button:focus-visible,
+#ov button:focus-visible {
+  outline: 3px solid var(--neon-blue-hi);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Em navegadores antigos, :focus-visible não existe → fallback */
+@supports not selector(:focus-visible) {
+  button:focus {
+    outline: 3px solid var(--neon-blue-hi);
+    outline-offset: 2px;
+  }
+}
+
+/* Alto contraste */
+@media (prefers-contrast: more) {
+  :root {
+    --tx: #ffffff;
+    --tx-dim: #e0d6c2;
+    --neon-blue-lo: #003a80;
+    --tmold-lo: #b89100;
+  }
+  #hud { box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, .9),
+    inset 0 0 24px rgba(57, 255, 20, .18),
+    0 3px 0 #000,
+    0 0 0 2px var(--neon-green);
+  }
+  button { border-color: var(--neon-yellow); }
+}
+
+/* Movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  #theater *,
+  #ov,
+  #ov.full > * { animation: none !important; }
+  #theater .th-title,
+  #theater .th-menu { opacity: 1; visibility: visible; }
+}
+/* Fala do personagem da missão no card de resposta (ironias e reações) */
+.npcsay {
+  margin: 10px 0;
+  padding: 8px 10px;
+  border-left: 4px solid var(--neon-yellow);
+  background: rgba(255, 255, 255, .06);
+  font-size: 1.05em;
+  line-height: 1.5;
+}
+.npcsay b { color: var(--neon-yellow); margin-right: 4px; }
+.npcsay b::after { content: ':'; }
