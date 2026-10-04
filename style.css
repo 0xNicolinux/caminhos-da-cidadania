@@ -1274,6 +1274,7 @@ body.immersive #pad {
     width: min(420px, 100%);
     gap: 8px;
     flex: 0 0 auto;
+    margin: clamp(36px, 8dvh, 64px) auto 0;
   }
   .th-menu .big { padding: 13px 10px; }
   .th-row { display: contents; }
