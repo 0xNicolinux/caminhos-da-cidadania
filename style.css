@@ -1230,6 +1230,10 @@ body.immersive #pad {
   #pad::after  { left: 10px; width: 34px; height: 34px; }
 }
 
+@media (max-width: 900px), (pointer: coarse) {
+  #pad { display: none !important; }
+}
+
 @media (max-height: 600px) {
   :root {
     --marquee-h: 52px;
@@ -1253,6 +1257,29 @@ body.immersive #pad {
   .th-sponsors { grid-column: 1 / -1; }
   .th-sponsors img { height: 18px; }
   #thSpot { min-height: 80px; }
+}
+
+@media (max-width: 700px), (pointer: coarse) {
+  .th-ui {
+    justify-content: flex-start;
+    overflow-y: auto;
+    padding: calc(var(--val) + 56px) max(16px, var(--sa-r)) max(12px, var(--sa-b)) max(16px, var(--sa-l));
+  }
+  .th-title h1 { font-size: clamp(19px, 7vw, 32px); margin: 2px 0; }
+  .th-title .titleSub { font-size: 8px; }
+  #thSpot { height: clamp(12px, 7dvh, 64px); min-height: 12px; flex: 0 1 auto; }
+  .th-menu {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: min(420px, 100%);
+    gap: 8px;
+    flex: 0 0 auto;
+  }
+  .th-menu .big { padding: 13px 10px; }
+  .th-row { display: contents; }
+  .th-row button { min-height: 44px; font-size: 16px; }
+  .th-sponsors { margin-top: 8px; flex-wrap: wrap; }
+  .th-sponsors img { height: 22px; }
 }
 
 

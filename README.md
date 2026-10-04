@@ -52,6 +52,12 @@ Depois acesse:
 http://localhost:8000
 ```
 
+## Controles
+
+- Em celulares e tablets, toque em um ponto do mapa para o personagem caminhar até lá. Toque em outro ponto para mudar o destino.
+- No computador, use as setas ou WASD para andar.
+- O áudio é liberado na primeira interação com a página, pois navegadores bloqueiam reprodução automática antes de um toque ou tecla.
+
 ## Funcionalidades
 
 - mundo urbano interativo em estilo retrô;

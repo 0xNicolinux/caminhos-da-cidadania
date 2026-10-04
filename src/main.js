@@ -358,7 +358,7 @@ const GR = .25, GC = W / GR, GL = H / GR,   /* grade de navegação: células de
   FAIXAS = [{ eixo: 'h', x0: 8.28, x1: 8.88, y0: 5, y1: 7 }, { eixo: 'h', x0: 11.1, x1: 11.72, y0: 5, y1: 7 },
   { eixo: 'v', x0: 9, x1: 11, y0: 4.3, y1: 4.88 }, { eixo: 'v', x0: 9, x1: 11, y0: 7.1, y1: 7.74 }],   /* encolhidas ~.2 tile no lado de onde o carro para, para ninguém ficar colado no para-choque */
   PORTAS = BL.map(b => ({ x: b[0] + b[2] / 2, y: b[1] + b[3] + .42, base: b[1] + b[3] + .04 })),   /* y = onde a pessoa para; base = o degrau da porta */
-  GRADE = [new Uint8Array(GC * GL), new Uint8Array(GC * GL)], DESTINOS = [], CONVS = [],
+  GRADE = [new Uint8Array(GC * GL), new Uint8Array(GC * GL)], GRADE_JOGADOR = new Uint8Array(GC * GL), DESTINOS = [], CONVS = [],
   AGENTES = [...CIV, ...ANIMAIS], CIV_SET = new Set(CIV), CAO = ANIMAIS.find(a => a.tipo == 'cachorro');
 let MISS = null, agora = 0, ambT = 0;
 
@@ -375,26 +375,28 @@ const nivel = () => !S || S.tot < 3 ? 'novo' : S.hit / S.tot >= .6 ? 'bem' : 'ma
 const VIZ = [[1, 0, 1], [-1, 0, 1], [0, 1, 1], [0, -1, 1], [1, 1, 1.414], [1, -1, 1.414], [-1, 1, 1.414], [-1, -1, 1.414]],
   pg = new Float32Array(GC * GL), pai = new Int32Array(GC * GL), fech = new Uint8Array(GC * GL),
   celX = i => (i % GC + .5) * GR, celY = i => (i / GC | 0) * GR + GR / 2;
-const livreCel = (i, sem) => GRADE[sem ? 1 : 0][i] && !noMiss(celX(i), celY(i));
-function celulaPerto(x, y, sem) {
+const livreCel = (i, sem, jogador) => (jogador ? GRADE_JOGADOR[i] : GRADE[sem ? 1 : 0][i]) && (jogador || !noMiss(celX(i), celY(i)));
+function celulaPerto(x, y, sem, jogador = false) {
   const ci = Math.max(0, Math.min(GC - 1, x / GR | 0)), cj = Math.max(0, Math.min(GL - 1, y / GR | 0));
-  for (let r = 0; r <= 10; r++)for (let dj = -r; dj <= r; dj++)for (let di = -r; di <= r; di++) {
-    if (Math.max(Math.abs(di), Math.abs(dj)) !== r) continue;
-    const i = ci + di, j = cj + dj; if (i >= 0 && j >= 0 && i < GC && j < GL && livreCel(j * GC + i, sem)) return j * GC + i
+  let melhor = -1, menorDistancia = Infinity;
+  for (let j = Math.max(0, cj - 10); j <= Math.min(GL - 1, cj + 10); j++)for (let i = Math.max(0, ci - 10); i <= Math.min(GC - 1, ci + 10); i++) {
+    const celula = j * GC + i, distancia = (i - ci) ** 2 + (j - cj) ** 2;
+    if (distancia < menorDistancia && livreCel(celula, sem, jogador)) { melhor = celula; menorDistancia = distancia }
   }
-  return -1
+  return melhor
 }
-function linhaLivre(a, b, sem) {
+function andavelJogador(x, y) { return x >= .3 && x <= W - .3 && y >= .4 && y <= H - .2 && !obstaculo(x, y) }
+function linhaLivre(a, b, sem, jogador = false) {
   const d = Math.hypot(b.x - a.x, b.y - a.y), n = Math.ceil(d / .08);
-  for (let k = 1; k < n; k++) { const u = k / n; if (!andavel(a.x + (b.x - a.x) * u, a.y + (b.y - a.y) * u, sem)) return false } return true
+  for (let k = 1; k < n; k++) { const u = k / n, x = a.x + (b.x - a.x) * u, y = a.y + (b.y - a.y) * u; if (jogador ? (!andavelJogador(x, y) || carroNoPonto(x, y, .1)) : !andavel(x, y, sem)) return false } return true
 }
-function suavizar(p, sem) {
+function suavizar(p, sem, jogador = false) {
   const o = [p[0]]; let i = 0;
-  while (i < p.length - 1) { let j = Math.min(p.length - 1, i + 18); while (j > i + 1 && !linhaLivre(p[i], p[j], sem)) j--; o.push(p[j]); i = j } return o
+  while (i < p.length - 1) { let j = Math.min(p.length - 1, i + 18); while (j > i + 1 && !linhaLivre(p[i], p[j], sem, jogador)) j--; o.push(p[j]); i = j } return o
 }
-/* A* na grade; 'sem' = true proíbe até as faixas (gatos nunca atravessam rua). Atravessar a via custa mais, então todo mundo prefere a calçada. */
-function planejar(x0, y0, x1, y1, sem) {
-  const a = celulaPerto(x0, y0, sem), b = celulaPerto(x1, y1, sem); if (a < 0 || b < 0) return null;
+/* A* na grade; pedestres penalizam a travessia, enquanto o jogador usa toda área livre e evita carros quando possível. */
+function planejar(x0, y0, x1, y1, sem, jogador = false) {
+  const a = celulaPerto(x0, y0, sem, jogador), b = celulaPerto(x1, y1, sem, jogador); if (a < 0 || b < 0) return null;
   pg.fill(1e9); fech.fill(0); pai.fill(-1);
   const hf = [], hi = [],
     push = (f, i) => { let k = hf.length; hf.push(f); hi.push(i); while (k > 0) { const p = (k - 1) >> 1; if (hf[p] <= f) break; hf[k] = hf[p]; hi[k] = hi[p]; k = p } hf[k] = f; hi[k] = i },
@@ -407,15 +409,17 @@ function planejar(x0, y0, x1, y1, sem) {
   while (hf.length) {
     const i = pop(); if (fech[i]) continue; fech[i] = 1; if (i === b) break; const ci = i % GC, cj = i / GC | 0;
     for (const [di, dj, c] of VIZ) {
-      const ni = ci + di, nj = cj + dj; if (ni < 0 || nj < 0 || ni >= GC || nj >= GL) continue; const k = nj * GC + ni; if (fech[k] || !livreCel(k, sem)) continue;
-      if (di && dj && (!livreCel(cj * GC + ni, sem) || !livreCel(nj * GC + ci, sem))) continue;
-      const ng = pg[i] + c + (naVia(celX(k), celY(k)) ? 20 : 0); if (ng < pg[k]) { pg[k] = ng; pai[k] = i; push(ng + hh(ni, nj), k) }
+      const ni = ci + di, nj = cj + dj; if (ni < 0 || nj < 0 || ni >= GC || nj >= GL) continue; const k = nj * GC + ni; if (fech[k] || !livreCel(k, sem, jogador)) continue;
+      if (di && dj && (!livreCel(cj * GC + ni, sem, jogador) || !livreCel(nj * GC + ci, sem, jogador))) continue;
+      const x = celX(k), y = celY(k), custoVia = jogador ? (naVia(x, y) ? .15 : 0) : naVia(x, y) ? 20 : 0;
+      const custoCarro = jogador && carroNoPonto(x, y, .1) ? 2.5 : 0;
+      const ng = pg[i] + c + custoVia + custoCarro; if (ng < pg[k]) { pg[k] = ng; pai[k] = i; push(ng + hh(ni, nj), k) }
     }
   }
   if (a !== b && pai[b] < 0) return null;
   const pts = []; for (let k = b; k >= 0; k = pai[k])pts.push({ x: celX(k), y: celY(k) }); pts.reverse();
-  pts[0] = { x: x0, y: y0 }; if (andavel(x1, y1, sem)) pts.push({ x: x1, y: y1 });
-  return suavizar(pts, sem)
+  pts[0] = { x: x0, y: y0 }; if (jogador ? andavelJogador(x1, y1) : andavel(x1, y1, sem)) pts.push({ x: x1, y: y1 });
+  return suavizar(pts, sem, jogador)
 }
 function destravar(a, sem) { for (let r = .1; r < 2.5; r += .1)for (let k = 0; k < 360; k += 30) { const x = a.x + Math.cos(k * Math.PI / 180) * r, y = a.y + Math.sin(k * Math.PI / 180) * r; if (andavel(x, y, sem) && !carroNoPonto(x, y, .3)) { a.x = x; a.y = y; return true } } return false }
 function pontoPerto(x, y, rmin, rmax, sem) {
@@ -665,6 +669,7 @@ function atualizarCao(a, dt, t) {
 /* ---- laço principal da cidade ---- */
 function iniciarCidade() {
   for (let s = 0; s < 2; s++)for (let j = 0; j < GL; j++)for (let i = 0; i < GC; i++)GRADE[s][j * GC + i] = andavelFixo(celX(j * GC + i), celY(j * GC + i), !!s) ? 1 : 0;
+  for (let i = 0; i < GC * GL; i++) GRADE_JOGADOR[i] = andavelJogador(celX(i), celY(i)) ? 1 : 0;
   for (let k = 0; k < GC * GL; k++)if (GRADE[0][k] && !naVia(celX(k), celY(k)) && distanciaRua(celX(k), celY(k)) >= .75) DESTINOS.push([celX(k), celY(k)]);
   const encaixa = (a, sem) => { if (!andavelFixo(a.x, a.y, sem)) { const c = celulaPerto(a.x, a.y, sem); if (c >= 0) { a.x = celX(c); a.y = celY(c) } } };
   CIV.forEach((p, i) => {
@@ -716,6 +721,10 @@ function desenhar(t, civis) {
   if (S) { const px = S.x * T, py = S.y * T, f = S.mv ? (S.wk * 6 | 0) % 2 : 0; L.push([py, () => ent(PP(), S.d, f, px, py, f ? -1 : 0)]) }
   CIV.forEach(p => { if (p.alpha > 0) L.push([p.y * T, () => desenharCivil(p, t)]) }); ANIMAIS.forEach(a => L.push([a.y * T, () => desenharAnimal(a, t)]));
   L.sort((a, b) => a[0] - b[0]).forEach(e => e[1]());
+  if (S && S.touchTarget) {
+    const x = S.touchTarget.x * T, y = S.touchTarget.y * T, r = 8 + Math.sin(t / 100) * 2;
+    g.strokeStyle = '#fff3a6'; g.lineWidth = 2; g.globalAlpha = .85; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.stroke(); g.globalAlpha = 1
+  }
   g.globalCompositeOperation = 'lighter'; g.drawImage(luz, 0, 0); g.globalCompositeOperation = 'source-over'; g.drawImage(ton, 0, 0); CIV.forEach(p => desenharBalao(p, t)); ANIMAIS.forEach(a => desenharBalao(a, t));   /* luz e tonalização pré-renderizadas (antes: 5 gradientes por frame) */
   PA.forEach(p => { g.globalAlpha = Math.min(1, p.l); g.fillStyle = p.c; g.fillRect(p.x, p.y, 5, 5) }); g.globalAlpha = 1
 }
@@ -769,7 +778,7 @@ function titulo() {
 function ajuda() {
   sfx('sel'); show(`<div class="card">
 <div class="kicker">MANUAL DO CIDADÃO</div><h3>COMO JOGAR</h3>
-<p>${makeIcon('gamepad-2')} Use <b>setas/WASD</b> ou os botões de toque para explorar a cidade.</p>
+<p>${makeIcon('gamepad-2')} No celular ou tablet, toque em um ponto do mapa para o personagem caminhar até lá. No computador, use <b>setas/WASD</b>.</p>
 <p>${makeIcon('message-circle-more')} A conversa começa automaticamente quando você chega perto dos personagens.</p>
 <p>${makeIcon('brain-circuit')} Responda com clique ou pelo <b>número da alternativa</b> no teclado. Você tem <b>30 segundos</b> por pergunta, e o jogo explica a resposta, inclusive quando você erra.</p>
 <p>${makeIcon('flame')} Acertos seguidos criam <b>COMBO</b> e aumentam sua pontuação.</p>
@@ -782,7 +791,7 @@ function ajuda() {
 function escolha() { sfx('sel'); show(`<h3>ESCOLHA SEU CAMINHO</h3><p>Duas portas estão abertas. Qual você segue?</p><div class="two">${['P', 'S'].map(k => `<button id="b${k}"><img class="pt" alt="" src="${spr(PP(k), 'd', 0).toDataURL()}"><b>${k == 'P' ? makeIcon('book-open') + ' ESTATUTOS' : makeIcon('shield-alert') + ' SEGURANÇA PÚBLICA'}</b><br>${k == 'P' ? 'ECA, Estatuto da Juventude, Estatuto da Pessoa Idosa e Conselho Tutelar.' : 'Fatores de risco, políticas públicas, participação e PNSP.'}</button>`).join('')}</div>`, 1); $('#bP').onclick = () => ini('P'); $('#bS').onclick = () => ini('S') }
 function ini(p) {
   S = { p, pts: 0, done: 0, classe: 0, h: {}, x: 8.5, y: 4.5, d: 'd', wk: 0, cb: 0, best: 0, tot: 0, hit: 0, q: 0, ach: [], seqErro: 0, parado: 0, evt: null, started: Date.now() }; keys = {}; definirTemaMusical('a'); sfx('go'); hud();
-  show(`<h3>${p == 'P' ? 'ESTATUTOS' : 'POLÍTICAS DE SEGURANÇA'}</h3><p>${p == 'P' ? 'Conheça os direitos previstos nos estatutos e o papel do Conselho Tutelar.' : 'Explore os fatores de risco, as responsabilidades e o PNSP.'} Procure o ponto de atenção no mapa. As classes do jogo são fictícias.</p><button id="go" class="big">COMEÇAR</button>`); $('#go').onclick = () => { sfx('sel'); hide() }; $('#go').focus()
+  show(`<h3>${p == 'P' ? 'ESTATUTOS' : 'POLÍTICAS DE SEGURANÇA'}</h3><p>${p == 'P' ? 'Conheça os direitos previstos nos estatutos e o papel do Conselho Tutelar.' : 'Explore os fatores de risco, as responsabilidades e o PNSP.'} Procure o ponto de atenção no mapa. No celular, toque em um ponto para caminhar até lá. As classes do jogo são fictícias.</p><button id="go" class="big">COMEÇAR</button>`); $('#go').onclick = () => { sfx('sel'); hide() }; $('#go').focus()
 }
 function run(m, i = 0) {
   const s = m.perguntas[i], o = emb([s.resposta, ...s.alternativas]); S.q = 0;
@@ -890,24 +899,61 @@ function mover(dt) {
     if (afastandoDeCarros(S, nx, S.y) && livrePara(nx, S.y)) S.x = nx;
     if (afastandoDeCarros(S, S.x, ny) && livrePara(S.x, ny)) S.y = ny;
     const w0 = S.wk; S.wk += dt; if ((S.wk * 4 | 0) != (w0 * 4 | 0)) sfx('st') }
-  const m = cur(); if (m && Math.hypot(S.x - m.x - .5, S.y - m.y - .5) < 1.1) { keys = {}; S.mv = 0; sfx('go'); run(m) }
+  const m = cur(); if (m && Math.hypot(S.x - m.x - .5, S.y - m.y - .5) < 1.1) { keys = {}; S.touchPath = S.touchTarget = null; S.mv = 0; sfx('go'); run(m) }
+}
+function tocarMapa(e) {
+  if (!S || ov.classList.contains('on') || !matchMedia('(max-width: 900px), (pointer: coarse)').matches || !e.isPrimary) return;
+  if (e.pointerType == 'mouse' && e.button !== 0) return;
+  const rect = cv.getBoundingClientRect(); if (!rect.width || !rect.height) return;
+  const x = (e.clientX - rect.left) / rect.width * 640, y = (e.clientY - rect.top) / rect.height * 384;
+  const caminho = planejar(S.x, S.y, x / T, y / T, false, true);
+  if (!caminho) { S.touchPath = S.touchTarget = null; keys = {}; return }
+  S.touchPath = caminho; S.touchIndex = 1;
+  S.touchTarget = caminho[caminho.length - 1];
+  S.touchWait = 0; S.touchLastX = S.x; S.touchLastY = S.y; keys = {}
+}
+function atualizarMovimentoToque(dt) {
+  if (!S || !S.touchPath || ov.classList.contains('on')) return;
+  while (S.touchIndex < S.touchPath.length && Math.hypot(S.touchPath[S.touchIndex].x - S.x, S.touchPath[S.touchIndex].y - S.y) < 3.2 * dt + .01) S.touchIndex++;
+  if (S.touchIndex >= S.touchPath.length) { S.touchPath = S.touchTarget = null; keys = {}; return }
+  if (Math.hypot(S.x - S.touchLastX, S.y - S.touchLastY) > .025) {
+    S.touchLastX = S.x; S.touchLastY = S.y; S.touchWait = 0
+  } else {
+    S.touchWait += dt;
+    if (S.touchWait > .8) {
+      const caminho = planejar(S.x, S.y, S.touchTarget.x, S.touchTarget.y, false, true);
+      if (!caminho) { S.touchPath = S.touchTarget = null; keys = {}; return }
+      S.touchPath = caminho; S.touchIndex = 1; S.touchWait = 0; S.touchLastX = S.x; S.touchLastY = S.y
+    }
+  }
+  const alvo = S.touchPath[S.touchIndex], dx = alvo.x - S.x, dy = alvo.y - S.y;
+  keys = {
+    ArrowRight: dx > .02, ArrowLeft: dx < -.02,
+    ArrowDown: dy > .02, ArrowUp: dy < -.02
+  }
 }
 function loop(t) {
   const dt = Math.min(.05, (t - last) / 1000); last = t;
   atualizarCidade(dt, t); const civis = pedestres();
   moverCarros(dt, civis);
   atualizarFumaca(dt);
-  if (S && !ov.classList.contains('on')) mover(dt);
+  if (S && !ov.classList.contains('on')) { atualizarMovimentoToque(dt); mover(dt) }
   if (S && S.q) { S.tm -= dt; const b = $('#tb i'); if (b) { b.style.width = 100 * S.tm / S.tmax + '%'; b.style.background = S.tm < 8 ? 'var(--no)' : 'var(--ok)' } if (S.tm <= 0) resp(S.cur.m, S.cur.i, S.cur.o, -1) }
   PA.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 520 * dt; p.l -= dt }); for (let i = PA.length; i--;)if (PA[i].l <= 0) PA.splice(i, 1);
   desenhar(t, civis); requestAnimationFrame(loop)
 }
 addEventListener('keydown', e => {
   audio(); if (e.key === 'Escape' && S && !ov.classList.contains('on')) { pauseGame(); return } if (S && S.q && /^[1-4]$/.test(e.key)) { const b = ov.querySelectorAll('#op button')[e.key - 1]; b && b.click(); return }
-  if (!ov.classList.contains('on')) { keys[e.key.length == 1 ? e.key.toLowerCase() : e.key] = 1; if (e.key.startsWith('Arrow')) e.preventDefault() }
+  if (!ov.classList.contains('on')) {
+    const k = e.key.length == 1 ? e.key.toLowerCase() : e.key;
+    if (S && S.touchPath && /^(Arrow(?:Up|Down|Left|Right)|w|a|s|d)$/.test(k)) { S.touchPath = S.touchTarget = null; keys = {} }
+    keys[k] = 1; if (e.key.startsWith('Arrow')) e.preventDefault()
+  }
 });
 addEventListener('keyup', e => { keys[e.key.length == 1 ? e.key.toLowerCase() : e.key] = 0 });
-addEventListener('pointerdown', audio);
+addEventListener('pointerdown', audio, true);
+addEventListener('keydown', audio, true);
+cv.addEventListener('pointerdown', tocarMapa);
 addEventListener('blur', () => { keys = {} }); document.addEventListener('visibilitychange', () => { if (document.hidden) keys = {} });
 document.getElementById('fs').onclick = toggleFullscreen;
 document.querySelectorAll('#pad button').forEach(b => { b.onpointerdown = e => { e.preventDefault(); keys[b.dataset.k] = 1 };['onpointerup', 'onpointerleave', 'onpointercancel'].forEach(ev => b[ev] = () => keys[b.dataset.k] = 0) });
