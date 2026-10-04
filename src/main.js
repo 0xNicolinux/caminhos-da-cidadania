@@ -28,6 +28,14 @@ const refreshIcons = root => {
     window.lucide.createIcons({ root: target, attrs: { class: 'app-icon' } });
   }
 };
+const ICO = {
+  max: '<path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/>',
+  min: '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>',
+  vol: '<path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/>',
+  mute: '<path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m22 9-6 6m0-6 6 6"/>'
+};
+/* ícones dos botões do topo: SVG embutido, sem depender da biblioteca lucide */
+const setIco = (el, key) => { if (el) el.innerHTML = `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICO[key]}</svg>` };
 function ajustarResolucaoCanvas() {
   const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
   const largura = Math.max(1, Math.round(cv.clientWidth * pixelRatio));
@@ -45,8 +53,8 @@ let M = {}, F = null;
 window.snd = () => {
   snd();
   const ativo = musicaAtiva();
-  $('#snd').innerHTML = makeIcon(ativo ? 'volume-2' : 'volume-x');
-  $('#thSnd').innerHTML = makeIcon(ativo ? 'volume-2' : 'volume-x');
+  setIco($('#snd'), ativo ? 'vol' : 'mute');
+  setIco($('#thSnd'), ativo ? 'vol' : 'mute');
 };
 
 /* ===== SPRITES ===== */
@@ -716,7 +724,12 @@ function desenhar(t, civis) {
 let S = null, keys = {}, last = 0, tw = null;
 const lista = () => [...M[S.p], F], cur = () => lista()[S.done];
 const show = (h, full) => { theaterHide(); ov.className = 'on' + (full ? ' full' : ''); ov.innerHTML = stripEmoji(h); ov.scrollTop = 0; refreshIcons(ov) }, hide = () => { ov.className = '' };
-function hud() { $('#hi').innerHTML = S ? `<b>${NOME[S.p]}</b> · ${TIT[S.p][S.classe]}<br>${makeIcon('star')} ${S.pts}${S.cb > 1 ? ' ' + makeIcon('flame') + ' x' + S.cb : ''} · missões ${Math.min(S.done, M[S.p].length)}/${M[S.p].length} ${deluxeProgress()}` : 'CAMINHOS DA<br>CIDADANIA' }
+function atualizarPersonagemTopo() {
+  const orb = document.getElementById('orbChar'), img = document.getElementById('orbCharImg'); if (!orb || !img) return;
+  if (S) { const url = spr(PP(S.p), 'd', 0).toDataURL(); if (img.dataset.k !== S.p) { img.src = url; img.dataset.k = S.p } img.hidden = false; orb.classList.add('has-char') }
+  else { img.hidden = true; img.dataset.k = ''; orb.classList.remove('has-char') }
+}
+function hud() { atualizarPersonagemTopo(); $('#hi').innerHTML = S ? `<b>${NOME[S.p]}</b> · ${TIT[S.p][S.classe]}<br>${makeIcon('star')} ${S.pts}${S.cb > 1 ? ' ' + makeIcon('flame') + ' x' + S.cb : ''} · missões ${Math.min(S.done, M[S.p].length)}/${M[S.p].length} ${deluxeProgress()}` : 'CAMINHOS DA<br>CIDADANIA' }
 function type(el, txt, done) { let i = 0; clearInterval(tw); const sk = () => { clearInterval(tw); el.textContent = txt; ov.onclick = null; done() }; ov.onclick = sk; tw = setInterval(() => { i += 2; el.textContent = txt.slice(0, i); if (i % 6 == 0) sfx('tx'); if (i >= txt.length) sk() }, 28) }
 function badge(t) { return `<span class="achievement">${t}</span>` }
 function deluxeProgress() { if (!S) return ''; const pct = Math.min(100, Math.round((S.done / M[S.p].length) * 100)); return `<div class="bar"><i style="width:${pct}%"></i></div><small>${pct}% da campanha principal</small>` }
@@ -738,9 +751,11 @@ async function exitFullscreen() {
   document.body.classList.remove('immersive'); updateFSButton()
 }
 function toggleFullscreen() { audio(); if (document.fullscreenElement || document.webkitFullscreenElement || document.body.classList.contains('immersive')) exitFullscreen(); else goFullscreen() }
-function updateFSButton() { const b = document.getElementById('fs'); if (!b) return; b.innerHTML = makeIcon('maximize-2'); b.title = 'Tela inteira' }
+function updateFSButton() {
+  const on = !!(document.fullscreenElement || document.webkitFullscreenElement || document.body.classList.contains('immersive'));
+  ['fs', 'thFs'].forEach(id => { const b = document.getElementById(id); if (b) { setIco(b, on ? 'min' : 'max'); b.title = on ? 'Sair da tela inteira' : 'Tela inteira' } })
+}
 document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) document.body.classList.remove('immersive'); updateFSButton() });
-window.addEventListener('resize', updateFSButton);
 
 function titulo() {
   S = null; definirTemaMusical('a'); hud(); hide();
@@ -897,6 +912,7 @@ addEventListener('blur', () => { keys = {} }); document.addEventListener('visibi
 document.getElementById('fs').onclick = toggleFullscreen;
 document.querySelectorAll('#pad button').forEach(b => { b.onpointerdown = e => { e.preventDefault(); keys[b.dataset.k] = 1 };['onpointerup', 'onpointerleave', 'onpointercancel'].forEach(ev => b[ev] = () => keys[b.dataset.k] = 0) });
 
+updateFSButton();
 configurarAbertura({ alternarFullscreen: toggleFullscreen, alternarSom: () => window.snd() });
 
 iniciarCidade(); mundo(); requestAnimationFrame(loop);

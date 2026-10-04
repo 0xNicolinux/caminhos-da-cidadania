@@ -328,11 +328,15 @@ body::after {
    5. TOPO — ALTO-FALANTES + HUD
    ============================================================ */
 #top {
+  /* tamanhos fluidos: círculos e botões escalam com a tela */
+  --spk: clamp(40px, 9vw, 68px);
+  --btn: clamp(34px, 6.5vw, 48px);
+
   position: relative;
   display: flex;
-  gap: 8px;
+  gap: clamp(4px, 1vw, 8px);
   align-items: center;
-  padding: 10px 96px;
+  padding: 10px clamp(6px, 1.4vw, 12px);
   background: linear-gradient(180deg, var(--panel-hi) 0%, var(--panel) 50%, var(--panel-lo) 100%);
   border: 2px solid var(--tmold-lo);
   border-radius: 4px;
@@ -343,32 +347,44 @@ body::after {
   flex: 0 0 auto;
 }
 
-/* Alto-falantes (grade pontilhada) */
-#top::before,
-#top::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 68px;
-  height: 68px;
+/* Círculos das pontas: 1º = personagem, 4º = bandeira */
+.orb {
+  flex: 0 0 auto;
+  width: var(--spk);
+  height: var(--spk);
   border-radius: 50%;
-  background:
-    radial-gradient(circle at 50% 50%, #000 0%, #0a0a0a 30%, #000 100%),
-    repeating-radial-gradient(circle at 50% 50%,
-      transparent 0 2px, rgba(255, 255, 255, .05) 2px 3px),
-    repeating-linear-gradient(0deg,
-      transparent 0 4px, rgba(255, 255, 255, .08) 4px 5px);
-  background-size: 100%, 100%, 100%;
   border: 3px solid var(--tmold-lo);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
   box-shadow:
-    inset 0 0 16px #000,
-    inset 0 2px 6px rgba(255, 255, 255, .1),
+    inset 0 0 10px rgba(0, 0, 0, .6),
     0 0 14px rgba(255, 32, 64, .35),
     0 4px 0 #000;
 }
-#top::before { left: 14px; }
-#top::after  { right: 14px; }
+.orb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+.orb img[hidden] { display: none; }
+
+/* personagem: sprite inteiro dentro do círculo, sobre fundo azul */
+.orb-char {
+  background:
+    radial-gradient(circle at 50% 50%, #000 0%, #0a0a0a 30%, #000 100%),
+    repeating-radial-gradient(circle at 50% 50%,
+      transparent 0 2px, rgba(255, 255, 255, .05) 2px 3px);
+}
+.orb-char.has-char {
+  background: radial-gradient(circle at 50% 35%, #2a4a8a 0%, #12254d 55%, #070d1f 100%);
+}
+.orb-char img { object-fit: contain; padding: 12% 0 6%; }
+
+/* bandeira: preenche o círculo */
+.orb-flag { background: #009c3b; }
+.orb-flag img { object-fit: cover; }
 
 /* Display verde-fósforo do HUD */
 #hud {
@@ -399,9 +415,10 @@ body::after {
 /* Botoeiras do gabinete */
 .topbtn,
 #snd {
-  width: 48px;
-  height: 48px;
-  font-size: 18px;
+  width: var(--btn, 48px);
+  height: var(--btn, 48px);
+  flex: 0 0 auto;
+  font-size: clamp(14px, 2.6vw, 18px);
   text-align: center;
   padding: 0;
   border: 2px solid var(--tmold-lo);
@@ -426,6 +443,26 @@ body::after {
   background: radial-gradient(circle at 35% 30%,
     var(--neon-yellow-hi) 0%, var(--neon-yellow) 60%, var(--neon-yellow-lo) 100%);
   color: var(--ink);
+}
+
+/* ícones SVG embutidos: herdam a cor do botão (claro normal, escuro no amarelo) */
+.ico {
+  display: block;
+  width: 56%;
+  height: 56%;
+  pointer-events: none;
+}
+.th-tools button { color: var(--tx); }
+.th-tools button:hover,
+.th-tools button:focus-visible { color: var(--ink); }
+@media (hover: none) {
+  /* no toque o :hover "gruda" após o clique: mantém o visual normal */
+  .topbtn:hover,
+  #snd:hover {
+    background: radial-gradient(circle at 35% 30%,
+      var(--panel-hi) 0%, var(--panel) 60%, var(--panel-lo) 100%);
+    color: var(--tx);
+  }
 }
 
 .topbtn:active,
@@ -1041,11 +1078,13 @@ button:focus-visible b { color: var(--ink); }
   z-index: 4;
 }
 .th-tools button {
-  width: 44px;
-  height: 44px;
+  width: clamp(36px, 8vw, 44px);
+  height: clamp(36px, 8vw, 44px);
   padding: 0;
   text-align: center;
-  font-size: 20px;
+  font-size: clamp(16px, 3.4vw, 20px);
+  display: grid;
+  place-items: center;
 }
 
 #thSkip {
@@ -1129,7 +1168,7 @@ body.immersive .stage {
   border-width: 4px;
   border-radius: 12px;
 }
-body.immersive #top { padding: 6px 8px; }
+body.immersive #top { --spk: clamp(36px, 8vh, 52px); --btn: clamp(32px, 7vh, 42px); padding-block: 6px; }
 body.immersive #pad {
   position: fixed;
   left: calc(var(--sa-l) + 14px);
@@ -1162,11 +1201,6 @@ body.immersive #pad {
     letter-spacing: 1.5px;
     padding: 0 12px;
   }
-  #top { padding: 8px 62px; gap: 6px; }
-  #top::before,
-  #top::after { width: 44px; height: 44px; }
-  .topbtn,
-  #snd { width: 38px; height: 38px; font-size: 14px; }
   #hud { font-size: var(--fs-small); padding: 6px 8px; }
   .stage { border-width: 6px; border-radius: 14px; }
   .featureGrid { grid-template-columns: 1fr; }
@@ -1194,9 +1228,6 @@ body.immersive #pad {
   #pad button { padding: 8px 0; font-size: 20px; }
   #pad::before { left: 22px; height: 44px; width: 12px; }
   #pad::after  { left: 10px; width: 34px; height: 34px; }
-  #top::before,
-  #top::after { width: 34px; height: 34px; }
-  #top { padding: 6px 48px; }
 }
 
 @media (max-height: 600px) {
@@ -1205,8 +1236,7 @@ body.immersive #pad {
     --base-h: 32px;
   }
   #app::before { font-size: clamp(10px, 2vw, 14px); }
-  #top::before,
-  #top::after { width: 38px; height: 38px; }
+  #top { --spk: 42px; --btn: 36px; }
 }
 
 @media (max-height: 480px) and (orientation: landscape) {
