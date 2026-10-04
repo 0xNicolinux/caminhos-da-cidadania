@@ -1,5 +1,6 @@
 import { NOME, TIT } from './data/game-config.js';
 import { carregarMissoes } from './data/missions.js';
+import { CARD, REACAO, RUA, DIAL, PET, EMO } from './data/falas.js';
 import { embaralhar as emb, sortearSemRepetir as sorteio } from './utils/random.js';
 import { LOGO_E, LOGO_S } from './assets/logos.js';
 import {
@@ -556,7 +557,7 @@ function atualizarConversa(c, t) {
   if (c.a.est != 'parar' || c.b.est != 'parar') { fimConversa(c); return }
   if (t < c.prox) return;
   if (c.i >= c.lin.length) { fimConversa(c); return }
-  falar(c.i % 2 ? c.b : c.a, c.lin[c.i], 1800); c.i++; c.prox = t + 1900
+  const dur = Math.max(1800, c.lin[c.i].length * 55); falar(c.i % 2 ? c.b : c.a, c.lin[c.i], dur); c.i++; c.prox = t + dur + 150
 }
 const baloesAtivos = () => AGENTES.filter(a => a.fala && agora < a.fala.ate).length;   /* teto de balões simultâneos, para a tela não virar história em quadrinhos */
 function falaAmbiente(t) {
@@ -679,58 +680,6 @@ function atualizarCidade(dt, t) {
   falaAmbiente(t); reagirAoJogador(dt, t)
 }
 
-/* ===== FALAS =====
-   Cada lista é embaralhada e consumida inteira antes de repetir qualquer frase (ver sorteio). {n} vira um número. */
-/* Fala do personagem da missão no card de resposta */
-const CARD = {
-  ok: ['Acertou. Isso faz sentido.', 'Boa. Você está atento.', 'Certo. É isso mesmo.', 'Mandou bem.', 'Isso aí. Tá no caminho certo.', 'Parabéns. Você entendeu.', 'Boa resposta.', 'Acertou. Está indo bem.'],
-  combo: ['Combo! Tá no ritmo.', '{n} seguidas. Bom passo.', 'Você está acertando com consistência.', '{n} seguidas. Continue assim.', 'Ficou bom. Você está entrando no tema.'],
-  no: ['Não foi dessa vez. Mas a explicação ajuda.', 'Quase. Releia e tenta de novo.', 'Foi por pouco.', 'A resposta certa era essa.', 'Não foi essa. Mas o tema ficou mais claro.'],
-  seq: ['Tá caindo em sequência. Dá uma respirada e tenta de novo.', '{n} erros seguidos. Isso acontece.', 'Você pode melhorar nessa parte.', 'Atenção: a próxima pergunta é mais simples.'],
-  quebra: ['O combo acabou. Não é o fim.', 'Você tinha uma sequência boa.', 'Quase fechou. Volta no próximo.', 'A cidade ainda está no jogo.'],
-  tempo: ['Tempo esgotado. Dá pra tentar outra vez.', 'Acabou o tempo. Não se preocupa.', 'Não deu tempo. Vem uma nova chance.', 'A cidade espera você tentar de novo.'],
-  missao: ['Missão concluída. Cidade melhorando.', 'Essa missão foi fechada.', 'Conseguiu. Tá ficando mais fácil da próxima vez.', 'Boa. A cidade agradece.', 'Mais uma missão resolvida.'],
-  classe: ['Você avançou de nível.', 'Nova etapa. Continue.', 'Sua classe melhorou.', 'Você está evoluindo.', 'Tá indo em frente.'],
-  finalBom: ['Boa atuação. A cidade notou.', 'Você saiu bem dessa.', 'Resultado muito bom.', 'A rede da cidade agradece.'],
-  finalMedio: ['Foi um resultado honesto.', 'Não foi perfeito, mas funcionou.', 'Você deu conta.', 'Bom avanço.'],
-  finalRuim: ['Ainda dá pra melhorar. Mas o caminho foi útil.', 'Não ficou ótimo, mas serviu como aprendizado.', 'A cidade ainda vai precisar de você.', 'Tem espaço pra evoluir.']
-};
-
-/* Balões dos moradores quando o jogador faz algo (ou deixa de fazer) */
-const REACAO = {
-  ok: ['Acertou.', 'Boa.', 'Isso mesmo.', 'Tá indo bem.', 'Certo.', 'Mandou bem.'],
-  no: ['Não foi dessa vez.', 'Quase.', 'A próxima dá.', 'A resposta certa aparecia ali.', 'Foi por pouco.'],
-  tempo: ['Acabou o tempo.', 'Não deu pra responder.', 'Ficou sem tempo.', 'A cidade passou rápido.'],
-  combo: ['Combo!', 'Você tá no ritmo.', 'Boa sequência.', 'Está pegando bem.'],
-  missao: ['Missão fechada.', 'Conseguiu.', 'Cidade agradece.', 'Bora seguir.'],
-  classe: ['Nova etapa.', 'Você avançou.', 'Tá evoluindo.', 'Nível melhorado.']
-};
-
-/* Comentários de rua: por desempenho, ao chegar perto, quando o jogador fica parado e conversa solta */
-const RUA = {
-  novo: ['Você é novo por aqui?', 'A cidade é grande, mas a gente se acostuma.', 'Tudo bem. É só começar.', 'Dá uma caminhada e você pega o ritmo.'],
-  bem: ['Você tá entendendo bem.', 'A cidade agradece.', 'Tá no caminho certo.', 'Boa. Você sabe o que tá fazendo.'],
-  mal: ['Vai ser melhor na próxima.', 'Tenta olhar mais os detalhes.', 'A cidade exige atenção.', 'Tá quase lá.'],
-  parado: ['Tá esperando o quê?', 'Se quiser, dá uma volta.', 'A cidade não vai mudar sozinha.', 'Olha, dá pra andar um pouco.'],
-  perto: ['Ei, bom dia.', 'Tá indo em frente.', 'Dá licença.', 'A calçada é de todos.'],
-  ocioso: ['Tá frio hoje.', 'Esse cruzamento fica movimentado demais.', 'Vai chover? Talvez.', 'Esse bairro nunca fica parado por muito tempo.']
-};
-
-/* Conversas entre dois moradores (alternam as falas) */
-const DIAL = {
-  neutro: [['Tá vendo essa rua?', 'Tá bem movimentada hoje.'], ['A prefeitura vem tarde mesmo.', 'É sempre assim.'], ['Esse cruzamento é complicado.', 'Pois é. Melhor olhar bem antes de atravessar.'], ['Tá calor hoje.', 'Tá. A sombra aqui é melhor.'], ['Você viu o cachorro ali?', 'Vi. Tá de boa.'], ['A cidade tá tranquila hoje.', 'É bom quando isso acontece.']],
-  novo: [['Você veio da escola?', 'Mais ou menos. Estou conhecendo o bairro.'], ['Você tá se adaptando?', 'Ainda estou vendo tudo por aqui.'], ['Esse lugar é grande.', 'É mesmo. Mas a gente vai achando o caminho.']],
-  bem: [['Você tá sacando bastante.', 'Tô tentando.'], ['Você aprendeu bem.', 'A prática ajuda.'], ['Tá no caminho.', 'Melhor que antes, pelo menos.']],
-  mal: [['Você ainda tá pegando o jeito.', 'Vou tentar prestar mais atenção.'], ['Talvez seja melhor olhar de novo.', 'Tá. Vou dar uma olhada melhor.'], ['A cidade tem muita coisa acontecendo.', 'É mesmo. Dá pra aprender bastante.']]
-};
-
-/* Carinho nos bichos e sons que eles fazem */
-const PET = {
-  cachorro: ['Quem é o bonitinho? Quem é?', 'Olha esse focinho!', 'Esse aí é mais feliz que eu.', 'Aposto que ele entende de cidadania.', 'Carinho autorizado!'],
-  gato: ['Psiu, psiu... gatinho!', 'Esse aí me ignora com classe.', 'Cuidado, ele arranha. Eu sei.', 'Que olhar de desprezo!', 'Ele é o verdadeiro dono da praça.']
-},
-  EMO = { cachorro: ['AU!', 'AU AU!', 'ARF!', 'AUUU!'], gato: ['MIAU', 'miau~', 'prrr...', 'MIAAU!'] };
-
 const PA = [], FUMACA = [];
 function burst(m) { const x = (m.x + .5) * T, y = (m.y + .5) * T; for (let i = 0; i < 40; i++)PA.push({ x, y, vx: (Math.random() - .5) * 260, vy: -Math.random() * 280 - 40, l: 1.2, c: ['#ffd166', '#ef476f', '#06d6a0', '#118ab2', '#fff'][i % 5] }); rain(25) }
 function rain(n) { for (let i = 0; i < n; i++)PA.push({ x: Math.random() * 640, y: -10, vx: (Math.random() - .5) * 60, vy: Math.random() * 80, l: 2.4, c: ['#ffd166', '#ef476f', '#06d6a0', '#118ab2', '#fff'][i % 5] }) }
@@ -807,7 +756,7 @@ function ajuda() {
 <div class="kicker">MANUAL DO CIDADÃO</div><h3>COMO JOGAR</h3>
 <p>${makeIcon('gamepad-2')} Use <b>setas/WASD</b> ou os botões de toque para explorar a cidade.</p>
 <p>${makeIcon('message-circle-more')} A conversa começa automaticamente quando você chega perto dos personagens.</p>
-<p>${makeIcon('brain-circuit')} Responda com clique ou <b>1 a 4</b>. O jogo explica a resposta, inclusive quando você erra.</p>
+<p>${makeIcon('brain-circuit')} Responda com clique ou pelo <b>número da alternativa</b> no teclado. Você tem <b>30 segundos</b> por pergunta, e o jogo explica a resposta, inclusive quando você erra.</p>
 <p>${makeIcon('flame')} Acertos seguidos criam <b>COMBO</b> e aumentam sua pontuação.</p>
 <p>${makeIcon('alert-triangle')} Cada erro ou tempo esgotado desconta <b>5 pontos</b>. A classe avança a cada <b>3 acertos</b>.</p>
 <p>${makeIcon('trophy')} Complete as missões do caminho e encare a <b>ocorrência final</b>, que mistura os conteúdos.</p>
@@ -850,7 +799,7 @@ function fim(m) {
 }
 function final() {
   S.classe = Math.min(4, Math.floor(S.hit / 3)); definirTemaMusical('a'); sfx('win'); rain(120); fanfare('final'); const a = S.hit / S.tot, stars = a > .85 ? 'NÍVEL 3' : a > .6 ? 'NÍVEL 2' : 'NÍVEL 1', classeFinal = TIT[S.p][S.classe], linhaR = sorteio('cardfinal' + (a > .85 ? 'B' : a > .6 ? 'M' : 'R'), CARD[a > .85 ? 'finalBom' : a > .6 ? 'finalMedio' : 'finalRuim']);
-  let bs = 0; try { bs = +localStorage.cc || 0; if (S.pts > bs) localStorage.cc = bs = S.pts } catch (e) { }
+  let bs = 0; try { bs = +(localStorage.getItem('caminhos-da-cidadania:recorde') ?? localStorage.cc) || 0; if (S.pts > bs) { bs = S.pts; localStorage.setItem('caminhos-da-cidadania:recorde', bs) } } catch (e) { }
   const b = ['Proteção', 'Segurança', 'Participação', 'Prevenção', 'Direitos'].filter(k => S.h[k]).map(k => { const p = Math.round(100 * S.h[k][0] / S.h[k][1]); return `<div>${k} ${p}%<div class="bar"><i style="width:${p}%"></i></div></div>` }).join('');
   const o = S.p == 'P' ? 'S' : 'P';
   show(`<h3>${stars} ${classeFinal}</h3><p class="npcsay"><b>${F.personagem}</b> “${linhaR}”</p><p><b>"Você escolheu uma profissão. Mas a cidade nunca funcionou com apenas uma."</b></p>${b}<p>Estatutos protegem direitos, e as Políticas de Segurança organizam riscos e ações. Juntos formam uma rede.<br>Pontos: <b>${S.pts}</b> · Acertos: ${S.hit}/${S.tot} · Recorde: ${bs}</p><button id="o" class="big">JOGAR O CAMINHO ${NOME[o].toUpperCase()}</button><button id="r">Voltar ao início</button>`, 1);

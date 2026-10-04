@@ -30,13 +30,13 @@ Caminhos da Cidadania foi pensado como uma experiência lúdica para aproximar e
 
 ## Como jogar
 
-1. Abra o arquivo `index.html` em um navegador moderno;
-2. ou execute um servidor local na pasta do projeto;
-3. ou acesse a versão online:
+1. Acesse a versão online:
 
 ```text
 https://0xnicolinux.github.io/caminhos-da-cidadania/
 ```
+
+2. Ou rode localmente. Abrir o `index.html` direto (`file://`) **não funciona**, porque o jogo usa módulos ES e carrega o `missoes.json` via `fetch`, e o navegador bloqueia os dois nesse modo. Use um servidor local.
 
 ### Executando localmente
 
@@ -73,7 +73,7 @@ http://localhost:8000
 ├── src/
 │   ├── main.js
 │   ├── assets/
-│   ├── data/
+│   ├── data/          (missions.js, game-config.js, falas.js)
 │   ├── game/
 │   └── utils/
 └──
