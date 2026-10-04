@@ -144,14 +144,13 @@ function thModal(h) { const m = $('#thModal'); m.innerHTML = '<div class="box">'
 function creditos() {
   sfx('sel'); thModal(`<div class="kicker">NOS BASTIDORES</div><h3>CAMINHOS DA CIDADANIA</h3>
 <p>Bem-vindo(a) a <b>Nova Esperança</b>. Aqui, conhecimento não é decoração: ele muda a forma como você entende cada situação.</p>
-<div class="featureGrid"><div class="feature"><b>🛡️ PROTEÇÃO</b><span>ECA e Estatutos</span></div><div class="feature"><b>★ SEGURANÇA</b><span>Riscos e prevenção</span></div><div class="feature"><b>🤝 REDE</b><span>Participação e políticas</span></div></div>
+<div class="featureGrid"><div class="feature"><b>ESTATUTOS</b><span>ECA, juventude e pessoa idosa</span></div><div class="feature"><b>SEGURANÇA</b><span>Riscos e prevenção</span></div><div class="feature"><b>POLÍTICAS PÚBLICAS</b><span>Participação social e PNSP</span></div></div>
 <div class="creditsPanel"><div class="creditsTitle">EQUIPE RESPONSÁVEL PELO DESENVOLVIMENTO</div>
 <div class="teamGrid"><div class="teamMember"><b>EQUIPE</b><span>Nícolas Adriel</span></div><div class="teamMember"><b>EQUIPE</b><span>Gustavo Henrique</span></div><div class="teamMember"><b>EQUIPE</b><span>Marcela Stolv</span></div><div class="teamMember"><b>EQUIPE</b><span>Bruna Oliveira</span></div></div>
-<div class="classLine">TURMA <span class="neon">SENAI — ENERGISA · APB-044.029</span> · 4 ESTUDANTES</div>
+<div class="classLine">TURMA <span class="neon">SENAI — ENERGISA · APB-044.029</span></div>
 <div class="creditsTitle" style="margin-top:10px">EMPRESAS / INSTITUIÇÕES ENVOLVIDAS</div>
 <div class="partners"><div class="partner"><img src="${LOGO_E}" alt="Energisa"></div><div class="partner"><img src="${LOGO_S}" alt="SENAI"></div></div></div>
-<p><small>Áudio sintetizado · pixel art · controles por teclado e toque · progresso e feedback imediato</small></p>
-<button data-close class="big" style="text-align:center">✕ FECHAR</button>`)
+<button data-close class="big" style="text-align:center">FECHAR</button>`)
 }
 
 export function configurarAbertura({ alternarFullscreen, alternarSom }) {

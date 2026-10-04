@@ -19,6 +19,14 @@ import {
 } from './game/intro.js';
 
 const $ = s => document.querySelector(s), cv = $('#c'), g = cv.getContext('2d'), ov = $('#ov'), st = $('#st'), T = 32, W = 20, H = 12;
+const stripEmoji = value => String(value).replace(/[\p{Extended_Pictographic}\uFE0F]/gu, '');
+const makeIcon = (name, extra = '') => `<svg class="app-icon ${extra}" data-lucide="${name}" aria-hidden="true"></svg>`;
+const refreshIcons = root => {
+  const target = root || document;
+  if (window.lucide && typeof window.lucide.createIcons === 'function') {
+    window.lucide.createIcons({ root: target, attrs: { class: 'app-icon' } });
+  }
+};
 function ajustarResolucaoCanvas() {
   const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
   const largura = Math.max(1, Math.round(cv.clientWidth * pixelRatio));
@@ -35,9 +43,9 @@ const BL = [[1, 1, 3, 3, '#c9ada7', 'ESCOLA'], [5, 1, 3, 3, '#a3c4bc', 'SAÚDE']
 let M = {}, F = null;
 window.snd = () => {
   snd();
-  const indicador = musicaAtiva() ? '🔊' : '🔇';
-  $('#snd').textContent = indicador;
-  $('#thSnd').textContent = indicador;
+  const ativo = musicaAtiva();
+  $('#snd').innerHTML = makeIcon(ativo ? 'volume-2' : 'volume-x');
+  $('#thSnd').innerHTML = makeIcon(ativo ? 'volume-2' : 'volume-x');
 };
 
 /* ===== SPRITES ===== */
@@ -65,7 +73,7 @@ const PP = k => [HAIR[0], SKIN[0], (k || S.p) == 'P' ? '#3a86ff' : '#2b9348', '#
 /* ===== MUNDO ===== */
 const bg = document.createElement('canvas'); bg.width = 640; bg.height = 384;
 const luz = document.createElement('canvas'), ton = document.createElement('canvas');   /* camadas de iluminação pré-renderizadas em mundo() */
-const EM = ['📚', '🏥', '🏛️', '⚖️', '🤝', '🚔'], LP = [[4.5, 4.5], [14.5, 4.5], [4.5, 7.6], [15.4, 7.6]], WN = [], PROPS = [];
+const EM = ['escola', 'saude', 'prefeitura', 'conselho', 'comunidade', 'seguranca'], LP = [[4.5, 4.5], [14.5, 4.5], [4.5, 7.6], [15.4, 7.6]], WN = [], PROPS = [];
 const TREES = [[4.5, 2.8], [13.2, 2.8], [6.5, 9.9]], ARBUSTOS = [[4.7, 8.95], [14.35, 1.6]],
   FLORES = [[5.2, 9.5], [7.7, 10.8], [13.7, 3.1]], ANIMAIS = [
     { tipo: 'gato', x: 6, y: 10.4, cor: '#c98b4c', luz: '#f0c982' },
@@ -84,7 +92,7 @@ const TREES = [[4.5, 2.8], [13.2, 2.8], [6.5, 9.9]], ARBUSTOS = [[4.7, 8.95], [1
     { x: 15.5, y: 7.5, vel: .9, shirt: '#d98aa0', pants: '#4a3d4f', skin: '#f1c27d', hair: '#5b3a29' }
   ];
 CARS.forEach(c => c.v = c.speed);   /* velocidade atual (acelera/freia suavemente) */
-let viaVerde = 'h', tempoVia = 0;
+let eixoLiberado = 'h', tempoFluxo = 0;
 const LINHA_PARADA = { h: { esquerda: 7.32, direita: 12.62 }, v: { norte: 3.32, sul: 8.65 } };
 function mundo() {
   const x = bg.getContext('2d'); let s = 7; const r = () => (s = s * 16807 % 2147483647) / 2147483647;
@@ -139,6 +147,7 @@ function mundo() {
     x.fillStyle = 'rgba(0,0,0,.11)'; for (let k = 12; k < w; k += 18)x.fillRect(X + k, Y + 18, 2, h - 20);
     x.fillStyle = '#252b38'; x.fillRect(X - 2, Y - 3, w + 4, 16); x.fillStyle = '#d8bd78'; x.fillRect(X - 2, Y - 3, w + 4, 2); x.fillStyle = '#17202b'; x.fillRect(X + 5, Y, w - 10, 10);
     x.textAlign = 'center'; x.font = 'bold 8px monospace'; x.fillStyle = '#fff1c5'; x.fillText(n, X + w / 2, Y + 8);
+    const iconeTipo = EM[i] || 'comunidade';
     [X + 13, X + w - 29].forEach((a, j) => {
       x.fillStyle = '#26313d'; x.fillRect(a - 2, Y + 21, 20, 18); x.fillStyle = '#9bd0d0'; x.fillRect(a, Y + 23, 16, 14);
       if (j === 0) {
@@ -155,6 +164,7 @@ function mundo() {
       }
       x.fillStyle = '#d9f0da'; x.fillRect(a + 2, Y + 24, 4, 2); x.fillStyle = '#627f85'; x.fillRect(a + 7, Y + 23, 2, 14); x.fillRect(a, Y + 29, 16, 2); WN.push([a, Y + 23])
     });
+    desenharPlacaServico(x, iconeTipo, X + w / 2 - 13, Y + 22);
     const door = X + w / 2 - 10, dy = Y + h - 28; x.fillStyle = '#ddc693'; x.fillRect(door - 2, dy - 2, 24, 30); x.fillStyle = '#49342d'; x.fillRect(door, dy, 20, 28); x.fillStyle = '#76513a'; x.fillRect(door + 3, dy + 3, 14, 25); x.fillStyle = '#e8c968'; x.fillRect(door + 15, dy + 14, 2, 3); x.fillStyle = '#f0d9a0'; x.fillRect(door - 4, Y + h, 28, 4);
     x.fillStyle = '#263e31'; x.fillRect(X + 5, Y + h - 15, 8, 7); x.fillRect(X + w - 13, Y + h - 15, 8, 7); x.fillStyle = '#71a45a'; x.fillRect(X + 7, Y + h - 20, 4, 6); x.fillRect(X + w - 11, Y + h - 19, 4, 5);
     x.fillStyle = 'rgba(255,255,255,.18)'; x.fillRect(X + 2, Y + 17, 2, h - 19);
@@ -182,6 +192,50 @@ function preLuz() {
   const l = luz.getContext('2d'); luz.width = ton.width = 640; luz.height = ton.height = 384; l.globalCompositeOperation = 'lighter';
   LP.forEach(([a, b]) => { const X = Math.round(a * T), Y = Math.round(b * T) - 28, q = l.createRadialGradient(X, Y, 2, X, Y, 66); q.addColorStop(0, 'rgba(255,200,90,.45)'); q.addColorStop(1, 'rgba(255,200,90,0)'); l.fillStyle = q; l.fillRect(X - 66, Y - 66, 132, 132) });
   const k = ton.getContext('2d'), q = k.createLinearGradient(0, 0, 0, 384); q.addColorStop(0, 'rgba(255,130,50,.14)'); q.addColorStop(1, 'rgba(30,20,90,.28)'); k.fillStyle = q; k.fillRect(0, 0, 640, 384)
+}
+function desenharPlacaServico(ctx, tipo, x, y) {
+  const cores = {
+    escola: '#d6a84f', saude: '#d65350', prefeitura: '#568c9b',
+    conselho: '#db9a55', comunidade: '#68a46d', seguranca: '#547eaa'
+  };
+  ctx.fillStyle = '#18232d'; ctx.fillRect(x - 2, y - 2, 30, 24);
+  ctx.fillStyle = '#e9ddbd'; ctx.fillRect(x, y, 26, 20);
+  ctx.fillStyle = cores[tipo] || '#738b7d'; ctx.fillRect(x, y, 26, 3);
+  ctx.fillStyle = '#26333d';
+
+  switch (tipo) {
+    case 'escola':
+      ctx.fillStyle = '#815d39'; ctx.fillRect(x + 5, y + 7, 8, 9); ctx.fillRect(x + 13, y + 7, 8, 9);
+      ctx.fillStyle = '#fff4d5'; ctx.fillRect(x + 6, y + 6, 7, 8); ctx.fillRect(x + 14, y + 6, 7, 8);
+      ctx.fillStyle = '#d6a84f'; ctx.fillRect(x + 12, y + 7, 2, 10);
+      ctx.fillStyle = '#7696a0'; ctx.fillRect(x + 8, y + 9, 3, 1); ctx.fillRect(x + 15, y + 9, 3, 1);
+      ctx.fillRect(x + 8, y + 12, 4, 1); ctx.fillRect(x + 15, y + 12, 4, 1);
+      break;
+    case 'saude':
+      ctx.fillStyle = '#fff8e8'; ctx.fillRect(x + 6, y + 5, 14, 13);
+      ctx.fillStyle = '#c84543'; ctx.fillRect(x + 11, y + 7, 4, 9); ctx.fillRect(x + 8, y + 10, 10, 4);
+      break;
+    case 'prefeitura':
+      ctx.fillStyle = '#9d7747'; ctx.fillRect(x + 5, y + 8, 16, 2); ctx.fillRect(x + 4, y + 16, 18, 2);
+      ctx.fillStyle = '#568c9b'; ctx.fillRect(x + 7, y + 7, 12, 2); ctx.fillRect(x + 9, y + 5, 8, 2);
+      ctx.fillStyle = '#f3e8c8'; ctx.fillRect(x + 7, y + 10, 2, 6); ctx.fillRect(x + 12, y + 10, 2, 6); ctx.fillRect(x + 17, y + 10, 2, 6);
+      break;
+    case 'conselho':
+      ctx.fillStyle = '#547f7d'; ctx.fillRect(x + 5, y + 8, 16, 9);
+      ctx.fillStyle = '#f4d993'; ctx.fillRect(x + 11, y + 6, 4, 4); ctx.fillRect(x + 6, y + 9, 4, 4); ctx.fillRect(x + 16, y + 9, 4, 4);
+      ctx.fillStyle = '#f4e8ca'; ctx.fillRect(x + 10, y + 11, 6, 5); ctx.fillRect(x + 5, y + 14, 6, 3); ctx.fillRect(x + 15, y + 14, 6, 3);
+      break;
+    case 'comunidade':
+      ctx.fillStyle = '#f7edcf'; ctx.fillRect(x + 6, y + 8, 14, 10);
+      ctx.fillStyle = '#b9554b'; ctx.fillRect(x + 5, y + 6, 5, 3); ctx.fillStyle = '#e5c45d'; ctx.fillRect(x + 10, y + 6, 5, 3); ctx.fillStyle = '#6b9c65'; ctx.fillRect(x + 15, y + 6, 6, 3);
+      ctx.fillStyle = '#795b43'; ctx.fillRect(x + 8, y + 11, 4, 7); ctx.fillRect(x + 15, y + 11, 3, 3);
+      break;
+    case 'seguranca':
+      ctx.fillStyle = '#365a79'; ctx.fillRect(x + 8, y + 6, 10, 2); ctx.fillRect(x + 6, y + 8, 14, 6);
+      ctx.fillRect(x + 8, y + 14, 10, 3); ctx.fillRect(x + 10, y + 17, 6, 2);
+      ctx.fillStyle = '#f1d27a'; ctx.fillRect(x + 11, y + 9, 4, 1); ctx.fillRect(x + 9, y + 11, 8, 2); ctx.fillRect(x + 11, y + 13, 4, 1);
+      break;
+  }
 }
 function ent(p, d, f, x, y, b) { g.fillStyle = 'rgba(12,18,24,.24)'; g.beginPath(); g.ellipse(x, y + 9, 8, 2.5, 0, 0, Math.PI * 2); g.fill(); g.drawImage(spr(p, d, f), x - 9, y - 14 + b, 18, 24) }
 const tom = (hex, n) => '#' + [1, 3, 5].map(i => Math.max(0, Math.min(255, parseInt(hex.slice(i, i + 2), 16) + n)).toString(16).padStart(2, '0')).join('');
@@ -288,7 +342,7 @@ function desenharCarro(c) {
 }
 /* ===== CIDADE VIVA =====
    Pedestres, cachorro e gatos andam de verdade: cada um escolhe um destino, planeja o caminho numa grade (A*),
-   respeita calçadas, faixas de pedestre e semáforo, entra e sai dos prédios, conversa quando encontra alguém
+  respeita calçadas, faixas de pedestre e o fluxo do cruzamento, entra e sai dos prédios, conversa quando encontra alguém
    e reage ao jogador. Os carros (em folga, mais abaixo) também passaram a parar para qualquer pedestre na faixa. */
 const GR = .25, GC = W / GR, GL = H / GR,   /* grade de navegação: células de 1/4 de tile (80 × 48) */
   /* faixas de pedestre: 'eixo' é a via que elas atravessam (h = rua horizontal, v = rua vertical) */
@@ -302,7 +356,7 @@ let MISS = null, agora = 0, ambT = 0;
 const naVia = (x, y) => (y > 5 && y < 7) || (x > 9 && x < 11),
   naFaixa = (x, y) => FAIXAS.find(f => x >= f.x0 && x <= f.x1 && y >= f.y0 && y <= f.y1),
   distanciaRua = (x, y) => Math.min(y < 5 ? 5 - y : y > 7 ? y - 7 : 0, x < 9 ? 9 - x : x > 11 ? x - 11 : 0),
-  noMiss = (x, y) => MISS && Math.hypot(x - MISS[0], y - MISS[1]) < .8;   /* ninguém para em cima de quem está com o ❗ */
+  noMiss = (x, y) => MISS && Math.hypot(x - MISS[0], y - MISS[1]) < .8;   /* ninguém para em cima de quem está no ponto de atenção */
 function andavelFixo(x, y, sem) { if (x < .35 || x > W - .35 || y < .5 || y > H - .3 || obstaculo(x, y, .2)) return false; return !naVia(x, y) || (!sem && !!naFaixa(x, y)) }
 const andavel = (x, y, sem) => andavelFixo(x, y, sem) && !noMiss(x, y);
 const pedestres = () => { const l = CIV.filter(p => !p.oculto && p.alpha > .2); l.push(CAO); return l };
@@ -361,16 +415,31 @@ function pontoPerto(x, y, rmin, rmax, sem) {
     if (andavel(px, py, sem) && !naVia(px, py) && distanciaRua(px, py) >= .75) return { x: px, y: py }
   } return null
 }
+function buscarSaidaParaCalcada(p) {
+  const destinos = DESTINOS
+    .map(([x, y]) => ({ x, y, d: Math.hypot(x - p.x, y - p.y) }))
+    .filter(o => o.d > .5 && !carroNoPonto(o.x, o.y, .35) && !noMiss(o.x, o.y))
+    .sort((a, b) => a.d - b.d);
+  for (const destino of destinos.slice(0, 12)) {
+    const cam = planejar(p.x, p.y, destino.x, destino.y, false);
+    if (!cam || cam.length < 2) continue;
+    p.cam = cam; p.ci = 1; p.est = 'andar'; p.mov = false; p.vv = 0;
+    p.espera = 0; p.stk = 0; p.sx = p.x; p.sy = p.y; p.alvoPorta = -1; p.interesse = null;
+    return true
+  }
+  return false
+}
 
 /* Pedestres e animais só atravessam pela faixa quando o trecho está livre. */
 function podeAtravessar(x, y) {
   const f = naFaixa(x, y); if (!f) return true;
-  const h = f.eixo == 'h', pc = h ? (f.x0 + f.x1) / 2 : (f.y0 + f.y1) / 2, verde = viaVerde === f.eixo;
+  const h = f.eixo == 'h', pc = h ? (f.x0 + f.x1) / 2 : (f.y0 + f.y1) / 2, liberada = eixoLiberado === f.eixo;
   return !CARS.some(c => {
-    if (c.axis !== f.eixo || c.v <= .3) return false;
+    if (c.axis !== f.eixo || c.v <= .12) return false;
     const pos = h ? c.x : c.y, delta = (pc - pos) * c.dir, meia = h ? (f.x1 - f.x0) / 2 : (f.y1 - f.y0) / 2;
-    if (Math.abs(pc - pos) < .8 + meia + .3) return true;
-    return delta > -1 && delta < (verde ? 4.5 : 2)
+    const distancia = Math.abs(pc - pos);
+    if (distancia > meia + 1.4) return false;
+    return delta > -1.6 && delta < (liberada ? 6.5 : 4.2)
   })
 }
 function carroNoPonto(x, y, m = .14) { return CARS.some(c => distanciaCarro(c, x, y, m) === 0) }
@@ -441,7 +510,12 @@ function atualizarCivil(p, dt, t) {
   if (p.est == 'parar') { p.mov = false; if (p.conv) return; p.tm -= dt; if (Math.random() < dt * .3) p.face = ['l', 'r', 'd', 'd'][Math.random() * 4 | 0]; if (p.tm <= 0) novoDestino(p); return }
   const fim = andarAgente(p, dt, p.vel, false);
   if (fim) { chegou(p); return }
-  if (p.espera) { if (p.espera > 16) novoDestino(p); return }
+  if (p.espera > 2.5 && naVia(p.x, p.y)) {
+    if (!buscarSaidaParaCalcada(p)) p.espera = 2;
+    return
+  }
+  if (p.espera > 5) { novoDestino(p); return }
+  if (p.espera) return
   p.stk += dt; if (p.stk > 1.8) { if (Math.hypot(p.x - p.sx, p.y - p.sy) < .25) novoDestino(p); p.stk = 0; p.sx = p.x; p.sy = p.y }
 }
 function novoDestino(p) {
@@ -453,13 +527,13 @@ function novoDestino(p) {
   const quad = (x, y) => (x < 9 ? 0 : x > 11 ? 1 : 2) * 3 + (y < 5 ? 0 : y > 7 ? 1 : 2), mesmoLado = Math.random() < .7;   /* 70% das voltas ficam do mesmo lado da rua: menos fila nas faixas */
   for (let k = 0; k < 24 && !dest; k++) { const c = DESTINOS[Math.random() * DESTINOS.length | 0]; if (Math.hypot(c[0] - p.x, c[1] - p.y) > (k < 16 ? 2 : 1) && andavel(c[0], c[1]) && (!mesmoLado || k >= 16 || quad(c[0], c[1]) === quad(p.x, p.y))) dest = { x: c[0], y: c[1] } }
   const cam = dest && planejar(p.x, p.y, dest.x, dest.y, false);
-  if (!cam || cam.length < 2) { p.est = 'parar'; p.tm = 1 + Math.random() * 2; p.alvoPorta = -1; p.interesse = null; return }
+  if (!cam || cam.length < 2) { p.est = 'parar'; p.tm = .5 + Math.random(); p.alvoPorta = -1; p.interesse = null; return }
   p.cam = cam; p.ci = 1; p.est = 'andar'
 }
 function chegou(p) {
   p.cam = null; p.mov = false;
   if (p.alvoPorta >= 0) { p.porta = p.alvoPorta; p.alvoPorta = -1; p.est = 'entrar'; p.prog = 0; p.py0 = p.y; p.portaX = PORTAS[p.porta].x; p.portaY = PORTAS[p.porta].y; return }
-  p.est = 'parar'; p.tm = 1.5 + Math.random() * 4; const i = p.interesse; p.interesse = null;
+  p.est = 'parar'; p.tm = .6 + Math.random() * 1.4; const i = p.interesse; p.interesse = null;
   if (i && i.tipo && Math.hypot(i.x - p.x, i.y - p.y) < 1.8) { p.face = i.x > p.x ? 'r' : 'l'; falar(p, sorteio('pet' + i.tipo, PET[i.tipo]), 3200); i.carinho = agora + 3400; i.pet = p }
   else tentarConversa(p)
 }
@@ -471,7 +545,7 @@ function tentarConversa(p) {
   if (q && agora > p.cdConv) iniciarConversa(p, q)
 }
 function iniciarConversa(a, b) {
-  const niv = nivel(), geral = Math.random() < .4, lin = sorteio(geral ? 'dialn' : 'dial' + niv, geral ? DIAL.neutro : DIAL[niv]), c = { a, b, lin, i: 0, prox: agora + 300 };
+  const niv = nivel(), geral = Math.random() < .4, lin = sorteio(geral ? 'dialn' : 'dial' + niv, geral ? DIAL.neutro : DIAL[niv]), c = { a, b, lin, i: 0, prox: agora + 200 };
   a.conv = b.conv = c; a.est = b.est = 'parar'; a.tm = b.tm = 99; a.mov = b.mov = false; a.cam = b.cam = null; a.face = b.x > a.x ? 'r' : 'l'; b.face = a.face == 'r' ? 'l' : 'r'; CONVS.push(c)
 }
 function fimConversa(c) {
@@ -482,7 +556,7 @@ function atualizarConversa(c, t) {
   if (c.a.est != 'parar' || c.b.est != 'parar') { fimConversa(c); return }
   if (t < c.prox) return;
   if (c.i >= c.lin.length) { fimConversa(c); return }
-  falar(c.i % 2 ? c.b : c.a, c.lin[c.i], 3000); c.i++; c.prox = t + 3100
+  falar(c.i % 2 ? c.b : c.a, c.lin[c.i], 1800); c.i++; c.prox = t + 1900
 }
 const baloesAtivos = () => AGENTES.filter(a => a.fala && agora < a.fala.ate).length;   /* teto de balões simultâneos, para a tela não virar história em quadrinhos */
 function falaAmbiente(t) {
@@ -587,7 +661,7 @@ function iniciarCidade() {
   CIV.forEach((p, i) => {
     encaixa(p, false);
     Object.assign(p, {
-      est: 'parar', tm: .4 + Math.random() * 2.5 + i * .35, face: 'd', alpha: 1, pass: Math.random() * 6, fase: Math.random() * 6, mov: false, cdProx: 5000 + Math.random() * 5000, cdConv: 0,
+      est: 'parar', tm: .25 + Math.random() * 1.5 + i * .15, face: 'd', alpha: 1, pass: Math.random() * 6, fase: Math.random() * 6, mov: false, cdProx: 5000 + Math.random() * 5000, cdConv: 0,
       fala: null, cam: null, ci: 0, oculto: false, espera: 0, stk: 0, sx: p.x, sy: p.y, alvoPorta: -1, porta: -1, vel: p.vel || 1, hx: 0, hy: 1, conv: null
     })
   });
@@ -609,45 +683,45 @@ function atualizarCidade(dt, t) {
    Cada lista é embaralhada e consumida inteira antes de repetir qualquer frase (ver sorteio). {n} vira um número. */
 /* Fala do personagem da missão no card de resposta */
 const CARD = {
-  ok: ['Acertou. Não sei se foi mérito ou sorte, mas vou anotar.', 'Olha só! Alguém andou prestando atenção.', 'Certo. Pode comemorar, mas só um pouquinho.', 'Isso! Eu até ia fingir surpresa, mas não deu.', 'Correto. A cidade respira aliviada.', 'Boa! Viu como não era tão difícil quanto parecia?', 'Acertou. Vou fingir que nunca duvidei de você.', 'Muito bem. Guarda esse entusiasmo pra próxima.', 'É isso aí. Já está parecendo cidadão de verdade.', 'Certo! Quem diria, hein?', 'Acertou. Ou estudou, ou chutou com muito estilo.', 'Perfeito. Só não deixa isso subir à cabeça.', 'Ponto pra você. A prefeitura agradece (mas não paga).', 'Mandou bem. Não vou elogiar de novo, tá?'],
-  combo: ['{n} seguidas! Isso já está ficando suspeito.', '{n} acertos em sequência. Quem é você e onde está o jogador de antes?', 'Combo de {n}! Alguém acordou inspirado.', '{n} seguidas. Se continuar assim, vai me dar trabalho.', 'De novo! Isso é sorte ou talento? Ainda não decidi.', '{n} na fila e nenhum erro. A rede está orgulhosa.', 'Ei, devagar! Assim você me deixa sem pergunta difícil.', '{n} acertos. Dá pra imprimir e pendurar na parede.'],
-  no: ['Não foi dessa vez. Mas foi criativo, isso eu reconheço.', 'Errou. Respira, lê a explicação e finge que foi proposital.', 'Ih, errou. Aposto que você tinha certeza, né?', 'Quase! Quer dizer... não. Não foi quase.', 'Errou com tanta confiança que eu quase marquei como certo.', 'A resposta estava ali, quietinha, esperando. Você passou reto.', 'Isso aí foi um chute de longa distância, hein.', 'Erro registrado. Um minuto de silêncio pela pontuação.', 'Tudo bem, errar faz parte. Só não precisava ser tão bonito.', 'Ah, não. A rede de proteção está levando as mãos à cabeça.', 'Se tivesse medalha de tentativa, você levava o ouro.', 'Interessante. Escolheu a opção que mais parecia certa e menos era.', 'Eu avisei? Não avisei, mas estava pensando em avisar.', 'Errou. Mas olha pelo lado bom: agora você sabe o que NÃO é.', 'Foi por pouco. Ok, foi por bastante.'],
-  seq: ['De novo? Já estamos virando amigos de tanto você errar aqui.', '{n} erros seguidos. Isso é persistência ou teimosia?', 'Ei, está errando de propósito pra ver minha reação?', 'Sequência de erros detectada. Quer que eu chame a Rede de Proteção pra você?', 'Tudo bem... respira... lê a explicação desta vez, combinado?', 'Se continuar assim, vou começar a cobrar entrada.', '{n} seguidas, mas de erros. Impressionante à sua maneira.'],
-  quebra: ['Eram {n} acertos seguidos... eram.', 'E lá se foi o combo de {n}. Um minuto de silêncio.', 'Estava indo tão bem! {n} seguidas e tchau.', 'O combo de {n} acabou. Chorar não adianta, mas pode.'],
-  tempo: ['O tempo acabou! Pensou tanto que a cidade dormiu.', 'Sem resposta. Foi estratégia ou foi soneca?', '30 segundos e nada. Até o semáforo é mais rápido.', 'Tempo esgotado. O relógio ganhou de você.', 'Eu estava esperando você responder, mas a vida seguiu.', 'Ficou olhando pra tela, né? Acontece com os melhores.', 'Silêncio total. A pergunta até ficou sem graça.', 'O tempo acabou. A paciência da cidade também.', 'Time out! A ocorrência esfriou enquanto você pensava.', 'Pensar é bom, mas tem prazo de validade.'],
-  missao: ['Missão cumprida! Pode respirar, a próxima já está chegando.', 'Terminou. Merece um café, um pão de queijo e um relatório.', 'Mais uma resolvida. A cidade está um pouquinho melhor, e você um pouquinho menos perdido.', 'Missão concluída. Vou avisar a prefeitura. Ela não vai ligar, mas vou avisar.', 'Fechamos mais um caso. Anotei aqui: "ajudou, mas com drama".', 'Pronto! Agora vai lá, outro ❗ te espera.', 'Concluído. Dá pra ver que você já pegou o jeito (mais ou menos).', 'Missão feita. Vai, cidadão, antes que eu arranje mais trabalho pra você.'],
-  classe: ['Subiu de classe! Já pode pedir aumento (não vai ganhar).', 'Promoção! Título novo, mesmas pernas cansadas.', 'Nova classe desbloqueada. Não esquece quem acreditou em você... lá no fundo.', 'Evoluiu! Quem diria que ia chegar até aqui.', 'Classe nova! Pelo menos o crachá agora tem um título bonito.'],
-  finalBom: ['Impressionante. Tem certeza de que não colou?', 'Quase perfeito. Quase. Eu só gosto de implicar.', 'A cidade nunca esteve em tão boas mãos. Não conta pra ninguém que eu disse.', 'Isso foi bonito de ver. Pode se achar um pouquinho.'],
-  finalMedio: ['Foi bonito. Dá pra melhorar, mas foi bonito.', 'Nada mal! Metade da cidade já te respeita, a outra metade está pensando.', 'Passou bem. Não foi um desfile, mas passou.', 'Resultado honesto. A cidade agradece o esforço (e relevou os erros).'],
-  finalRuim: ['Você terminou. Isso já é uma vitória, considerando o caminho.', 'Foi... uma jornada. Vale tentar de novo com mais atenção.', 'A cidade sobreviveu. Dá pra dizer que graças a você? Dá pra dizer que apesar.', 'Ainda bem que a rede é grande. Ela precisou segurar muita coisa.']
+  ok: ['Acertou. Isso faz sentido.', 'Boa. Você está atento.', 'Certo. É isso mesmo.', 'Mandou bem.', 'Isso aí. Tá no caminho certo.', 'Parabéns. Você entendeu.', 'Boa resposta.', 'Acertou. Está indo bem.'],
+  combo: ['Combo! Tá no ritmo.', '{n} seguidas. Bom passo.', 'Você está acertando com consistência.', '{n} seguidas. Continue assim.', 'Ficou bom. Você está entrando no tema.'],
+  no: ['Não foi dessa vez. Mas a explicação ajuda.', 'Quase. Releia e tenta de novo.', 'Foi por pouco.', 'A resposta certa era essa.', 'Não foi essa. Mas o tema ficou mais claro.'],
+  seq: ['Tá caindo em sequência. Dá uma respirada e tenta de novo.', '{n} erros seguidos. Isso acontece.', 'Você pode melhorar nessa parte.', 'Atenção: a próxima pergunta é mais simples.'],
+  quebra: ['O combo acabou. Não é o fim.', 'Você tinha uma sequência boa.', 'Quase fechou. Volta no próximo.', 'A cidade ainda está no jogo.'],
+  tempo: ['Tempo esgotado. Dá pra tentar outra vez.', 'Acabou o tempo. Não se preocupa.', 'Não deu tempo. Vem uma nova chance.', 'A cidade espera você tentar de novo.'],
+  missao: ['Missão concluída. Cidade melhorando.', 'Essa missão foi fechada.', 'Conseguiu. Tá ficando mais fácil da próxima vez.', 'Boa. A cidade agradece.', 'Mais uma missão resolvida.'],
+  classe: ['Você avançou de nível.', 'Nova etapa. Continue.', 'Sua classe melhorou.', 'Você está evoluindo.', 'Tá indo em frente.'],
+  finalBom: ['Boa atuação. A cidade notou.', 'Você saiu bem dessa.', 'Resultado muito bom.', 'A rede da cidade agradece.'],
+  finalMedio: ['Foi um resultado honesto.', 'Não foi perfeito, mas funcionou.', 'Você deu conta.', 'Bom avanço.'],
+  finalRuim: ['Ainda dá pra melhorar. Mas o caminho foi útil.', 'Não ficou ótimo, mas serviu como aprendizado.', 'A cidade ainda vai precisar de você.', 'Tem espaço pra evoluir.']
 };
 
 /* Balões dos moradores quando o jogador faz algo (ou deixa de fazer) */
 const REACAO = {
-  ok: ['Acertou! Eita, que milagre!', 'Olha lá, o cidadão aprendeu!', 'Mandou bem... dessa vez.', 'Anota aí: um ponto pra humanidade.', 'Acertou? Será que foi sorte?', 'Opa! Esse aí lê as instruções.', 'Quem diria, hein?', 'Acertou, mas não se acostuma.', 'Palmas! Mas só duas, tá?', 'Desse jeito vira vereador.'],
-  no: ['Eita! Essa doeu até aqui.', 'Foi bonito o erro. Muito confiante!', 'Errou? A cidade já abriu um protocolo.', 'Não foi dessa vez, campeão.', 'Respira. Lê a explicação. Tenta de novo.', 'Isso foi chute ou estratégia?', 'Já leu o ECA ou só a capa?', 'Errar é humano. Você está sendo MUITO humano.', 'Ai, ai, ai... a rede está tremendo.', 'Pelo menos errou com estilo.'],
-  tempo: ['Dormiu na pergunta, foi?', 'O relógio ganhou de você!', 'Pensou tanto que a cidade envelheceu.', 'Tempo esgotado. Deu pra ouvir o grilo.', 'Respondeu? Não? Ah, tá.'],
-  combo: ['Combo! Quem é você?!', 'Tá pegando fogo! Cuidado pra não queimar.', 'Seguidinho assim vai me dar medo.', 'Esse jogador está inspirado hoje!', 'Alguém chama o prefeito! Temos um gênio.'],
-  missao: ['Mais uma missão! A cidade agradece.', 'Concluiu, é? Deve estar cansado.', 'Missão cumprida. Merece um pão de queijo.', 'Mais um ❗ resolvido. Falta o resto, né?', 'Eita, esse trabalha!'],
-  classe: ['Subiu de classe! Já pode pedir aumento.', 'Promovido! Cuidado com a vaidade.', 'Agora é título e tudo, hein?', 'Nova classe, mesma cara de perdido.', 'Evoluiu! A cidade está ficando chique.']
+  ok: ['Acertou.', 'Boa.', 'Isso mesmo.', 'Tá indo bem.', 'Certo.', 'Mandou bem.'],
+  no: ['Não foi dessa vez.', 'Quase.', 'A próxima dá.', 'A resposta certa aparecia ali.', 'Foi por pouco.'],
+  tempo: ['Acabou o tempo.', 'Não deu pra responder.', 'Ficou sem tempo.', 'A cidade passou rápido.'],
+  combo: ['Combo!', 'Você tá no ritmo.', 'Boa sequência.', 'Está pegando bem.'],
+  missao: ['Missão fechada.', 'Conseguiu.', 'Cidade agradece.', 'Bora seguir.'],
+  classe: ['Nova etapa.', 'Você avançou.', 'Tá evoluindo.', 'Nível melhorado.']
 };
 
 /* Comentários de rua: por desempenho, ao chegar perto, quando o jogador fica parado e conversa solta */
 const RUA = {
-  novo: ['Novo por aqui? Dá pra perceber.', 'O ❗ é aquele sinal piscando, sabe?', 'Calma, cidadão. O mapa não morde.', 'Se perdeu? Os prédios não andam.', 'Bem-vindo à cidade. Boa sorte.', 'Dica: ande até quem está piscando.', 'Olha o turista de novo!'],
-  bem: ['Olha só, o cidadão sabe das coisas.', 'Esse aí já devia estar na prefeitura.', 'Cuidado, daqui a pouco te chamam de prefeito.', 'Estudou antes de vir, é?', 'Aí sim! Cidadania de respeito.', 'Já pode dar aula, hein.', 'Acerta até quando eu chuto.', 'Está bom demais. Desconfio de cola.'],
-  mal: ['Esse aí erra mais que previsão do tempo.', 'Já leu o ECA ou só viu a capa?', 'A rede de proteção está preocupada contigo.', 'Dizem que errar é humano. Você está exagerando.', 'Bora estudar um pouquinho, cidadão?', 'Chutar também é estratégia... ruim.', 'Vai com calma. Ou vai com um livro.', 'Você erra com tanta confiança que dá orgulho.'],
-  parado: ['Vai ficar parado aí? A cidade não anda sozinha.', 'Está esperando o ❗ vir até você?', 'Parado assim vai virar poste.', 'Fotossíntese? Ou preguiça?', 'O mapa é grande, as pernas são suas.', 'Ei, tá vivo? Mexe aí!', 'Congelou? Tem tecla pra isso.', 'Decisão difícil: andar ou não andar?'],
-  perto: ['Licença, cidadão ilustre.', 'Pode passar. Com calma.', 'Ih, o fiscal chegou.', 'Está me seguindo, é?', 'Bom dia... ou o que for.', 'Anda rápido, hein. Corre atrás de quê?', 'Dá licença, a calçada é de todos.', 'Está perdido ou só passeando?', 'Você de novo?!'],
-  ocioso: ['Que calor hoje, hein.', 'Será que o ônibus passa hoje?', 'Esse semáforo demora mais que reunião.', 'Vou ali na prefeitura. Já volto... talvez.', 'Sempre tem fila. Sempre.', 'Preciso resolver umas coisinhas.', 'Esse cachorro vive melhor que eu.', 'Hoje vou usar a faixa direitinho.', 'O gato me deu aquele olhar de novo.', 'Quem pagou o poste ali? Eu não.', 'Dizem que vai chover. Mentira.', 'Bom dia, praça!', 'Preciso de um café.', 'Olha o carro vermelho de novo!']
+  novo: ['Você é novo por aqui?', 'A cidade é grande, mas a gente se acostuma.', 'Tudo bem. É só começar.', 'Dá uma caminhada e você pega o ritmo.'],
+  bem: ['Você tá entendendo bem.', 'A cidade agradece.', 'Tá no caminho certo.', 'Boa. Você sabe o que tá fazendo.'],
+  mal: ['Vai ser melhor na próxima.', 'Tenta olhar mais os detalhes.', 'A cidade exige atenção.', 'Tá quase lá.'],
+  parado: ['Tá esperando o quê?', 'Se quiser, dá uma volta.', 'A cidade não vai mudar sozinha.', 'Olha, dá pra andar um pouco.'],
+  perto: ['Ei, bom dia.', 'Tá indo em frente.', 'Dá licença.', 'A calçada é de todos.'],
+  ocioso: ['Tá frio hoje.', 'Esse cruzamento fica movimentado demais.', 'Vai chover? Talvez.', 'Esse bairro nunca fica parado por muito tempo.']
 };
 
 /* Conversas entre dois moradores (alternam as falas) */
 const DIAL = {
-  neutro: [['Viu o gato da praça?', 'Vi. Aquele manda mais que o prefeito.'], ['Vai pra prefeitura?', 'Vou. Já sei que vou esperar na fila.'], ['Esse semáforo, hein...', 'Demora mais que reunião de condomínio.'], ['Tá calor, né?', 'Calor? Isso aqui é um forno.'], ['Bora tomar um café?', 'Só se você pagar dessa vez.'], ['Lembra de olhar a faixa!', 'Eu olho! O carro é que não me olha.'], ['Viu o cachorro correndo?', 'Vi. Corre mais que eu atrás de ônibus.'], ['Hoje o dia está calmo.', 'Fala baixo, senão atrai problema.'], ['Ouvi dizer que a prefeitura vai abrir vaga.', 'Ouvi isso há três anos.'], ['Será que o Conselho resolve?', 'Resolve. Em algumas reuniões. Muitas.']],
-  novo: [['Quem é aquele ali?', 'O novato. Anda como quem perdeu o mapa.'], ['Ele vai ajudar a cidade?', 'Vai tentar. É o que importa.'], ['Aquele jogador acabou de chegar.', 'Dá uns minutos. Ele se acostuma.'], ['Está procurando o ❗?', 'Provavelmente. Mas olha pro lado errado.']],
-  bem: [['Aquele jogador acerta tudo.', 'Será que decorou o ECA inteiro?'], ['Viu a pontuação dele?', 'Vi. Dá vontade de pedir autógrafo.'], ['Esse aí é bom mesmo.', 'Só espero que não suba à cabeça.'], ['O jogador está voando hoje.', 'Se continuar, vira vereador.'], ['Ele errou alguma?', 'Dizem que sim. Eu nunca vi.']],
-  mal: [['Viu o desempenho dele?', 'Vi. Dá vontade de abrir ocorrência.'], ['Ele errou de novo?', 'Erra com tanta confiança que parece certo.'], ['Aquele jogador está aí de novo.', 'Reze pela rede de proteção dele.'], ['Ele já leu o ECA?', 'Acho que só a capa. E olhou torto.'], ['Será que ele melhora?', 'Tem potencial. Muito, muito escondido.'], ['Pelo menos ele tenta.', 'Tentar é bonito. Acertar é opcional.']]
+  neutro: [['Tá vendo essa rua?', 'Tá bem movimentada hoje.'], ['A prefeitura vem tarde mesmo.', 'É sempre assim.'], ['Esse cruzamento é complicado.', 'Pois é. Melhor olhar bem antes de atravessar.'], ['Tá calor hoje.', 'Tá. A sombra aqui é melhor.'], ['Você viu o cachorro ali?', 'Vi. Tá de boa.'], ['A cidade tá tranquila hoje.', 'É bom quando isso acontece.']],
+  novo: [['Você veio da escola?', 'Mais ou menos. Estou conhecendo o bairro.'], ['Você tá se adaptando?', 'Ainda estou vendo tudo por aqui.'], ['Esse lugar é grande.', 'É mesmo. Mas a gente vai achando o caminho.']],
+  bem: [['Você tá sacando bastante.', 'Tô tentando.'], ['Você aprendeu bem.', 'A prática ajuda.'], ['Tá no caminho.', 'Melhor que antes, pelo menos.']],
+  mal: [['Você ainda tá pegando o jeito.', 'Vou tentar prestar mais atenção.'], ['Talvez seja melhor olhar de novo.', 'Tá. Vou dar uma olhada melhor.'], ['A cidade tem muita coisa acontecendo.', 'É mesmo. Dá pra aprender bastante.']]
 };
 
 /* Carinho nos bichos e sons que eles fazem */
@@ -661,6 +735,13 @@ const PA = [], FUMACA = [];
 function burst(m) { const x = (m.x + .5) * T, y = (m.y + .5) * T; for (let i = 0; i < 40; i++)PA.push({ x, y, vx: (Math.random() - .5) * 260, vy: -Math.random() * 280 - 40, l: 1.2, c: ['#ffd166', '#ef476f', '#06d6a0', '#118ab2', '#fff'][i % 5] }); rain(25) }
 function rain(n) { for (let i = 0; i < n; i++)PA.push({ x: Math.random() * 640, y: -10, vx: (Math.random() - .5) * 60, vy: Math.random() * 80, l: 2.4, c: ['#ffd166', '#ef476f', '#06d6a0', '#118ab2', '#fff'][i % 5] }) }
 function shake() { st.classList.remove('sh'); void st.offsetWidth; st.classList.add('sh') }
+function desenharAlertaMissao(x, y, t) {
+  const topo = Math.round(y - 43 + Math.sin(t / 300) * 2);
+  g.fillStyle = 'rgba(20,25,30,.35)'; g.fillRect(x - 9, topo + 2, 18, 15); g.fillRect(x - 2, topo + 16, 5, 2); g.fillRect(x + 1, topo + 18, 3, 2);
+  g.fillStyle = '#26313a'; g.fillRect(x - 9, topo, 18, 15); g.fillRect(x - 2, topo + 14, 5, 3); g.fillRect(x + 1, topo + 17, 3, 2);
+  g.fillStyle = '#fff3d4'; g.fillRect(x - 7, topo + 2, 14, 11); g.fillRect(x - 1, topo + 15, 3, 1);
+  g.fillStyle = '#d83f3b'; g.fillRect(x - 1, topo + 4, 2, 5); g.fillRect(x - 1, topo + 10, 2, 2)
+}
 function desenhar(t, civis) {
   g.drawImage(bg, 0, 0); g.fillStyle = 'rgba(0,0,0,.07)';
   [0, 1, 2].forEach(i => { const cx = ((t / 60 + i * 260) % 800) - 120; g.fillRect(cx, 60 + i * 110, 90, 22); g.fillRect(cx + 20, 50 + i * 110, 50, 12) });
@@ -671,7 +752,7 @@ function desenhar(t, civis) {
   if (m) {
     const nx = (m.x + .5) * T, ny = (m.y + .5) * T, d = Math.abs(S.x - m.x - .5) > Math.abs(S.y - m.y - .5) ? (S.x < m.x + .5 ? 'l' : 'r') : 'd', z = Math.sin(t / 250);
     g.strokeStyle = m.cor; g.lineWidth = 3; g.globalAlpha = .75; g.beginPath(); g.ellipse(nx, ny + 9, 13 + z * 2, 5 + z, 0, 0, 7); g.stroke(); g.globalAlpha = 1;
-    L.push([ny, () => { ent(NP(m), d, 0, nx, ny, Math.sin(t / 300) > .5 ? -1 : 0); g.font = 'bold 18px monospace'; g.textAlign = 'center'; g.fillStyle = '#fff'; g.fillText('❗', nx, ny - 16 + Math.sin(t / 200) * 3) }])
+    L.push([ny, () => { ent(NP(m), d, 0, nx, ny, Math.sin(t / 300) > .5 ? -1 : 0); desenharAlertaMissao(nx, ny, t) }])
   }
   CARS.forEach(c => L.push([c.y * T, () => desenharCarro(c)])); PROPS.forEach(p => L.push(p.e));
   BORBOLETAS.forEach(b => L.push([b.y * T, () => desenharBorboleta(b, t)]));
@@ -685,8 +766,8 @@ function desenhar(t, civis) {
 /* ===== JOGO ===== */
 let S = null, keys = {}, last = 0, tw = null;
 const lista = () => [...M[S.p], F], cur = () => lista()[S.done];
-const show = (h, full) => { theaterHide(); ov.className = 'on' + (full ? ' full' : ''); ov.innerHTML = h; ov.scrollTop = 0 }, hide = () => { ov.className = '' };
-function hud() { $('#hi').innerHTML = S ? `<b>${NOME[S.p]}</b> · ${TIT[S.p][S.classe]}<br>⭐ ${S.pts}${S.cb > 1 ? ' 🔥 x' + S.cb : ''} · missões ${Math.min(S.done, M[S.p].length)}/${M[S.p].length} ${deluxeProgress()}` : 'CAMINHOS DA<br>CIDADANIA' }
+const show = (h, full) => { theaterHide(); ov.className = 'on' + (full ? ' full' : ''); ov.innerHTML = stripEmoji(h); ov.scrollTop = 0; refreshIcons(ov) }, hide = () => { ov.className = '' };
+function hud() { $('#hi').innerHTML = S ? `<b>${NOME[S.p]}</b> · ${TIT[S.p][S.classe]}<br>${makeIcon('star')} ${S.pts}${S.cb > 1 ? ' ' + makeIcon('flame') + ' x' + S.cb : ''} · missões ${Math.min(S.done, M[S.p].length)}/${M[S.p].length} ${deluxeProgress()}` : 'CAMINHOS DA<br>CIDADANIA' }
 function type(el, txt, done) { let i = 0; clearInterval(tw); const sk = () => { clearInterval(tw); el.textContent = txt; ov.onclick = null; done() }; ov.onclick = sk; tw = setInterval(() => { i += 2; el.textContent = txt.slice(0, i); if (i % 6 == 0) sfx('tx'); if (i >= txt.length) sk() }, 28) }
 function badge(t) { return `<span class="achievement">${t}</span>` }
 function deluxeProgress() { if (!S) return ''; const pct = Math.min(100, Math.round((S.done / M[S.p].length) * 100)); return `<div class="bar"><i style="width:${pct}%"></i></div><small>${pct}% da campanha principal</small>` }
@@ -708,35 +789,36 @@ async function exitFullscreen() {
   document.body.classList.remove('immersive'); updateFSButton()
 }
 function toggleFullscreen() { audio(); if (document.fullscreenElement || document.webkitFullscreenElement || document.body.classList.contains('immersive')) exitFullscreen(); else goFullscreen() }
-function updateFSButton() { const b = document.getElementById('fs'); if (!b) return; b.textContent = '⛶'; b.title = 'Tela inteira' }
+function updateFSButton() { const b = document.getElementById('fs'); if (!b) return; b.innerHTML = makeIcon('maximize-2'); b.title = 'Tela inteira' }
 document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) document.body.classList.remove('immersive'); updateFSButton() });
 window.addEventListener('resize', updateFSButton);
 
 function titulo() {
   S = null; definirTemaMusical('a'); hud(); hide();
-  $('#thMenu').innerHTML = `<button id="bj" class="big">▶ COMEÇAR JORNADA</button>
-<div class="th-row"><button id="bc">? COMO JOGAR</button><button id="bk">★ CRÉDITOS</button></div>
+  $('#thMenu').innerHTML = `<button id="bj" class="big">${makeIcon('play')} COMEÇAR JORNADA</button>
+<div class="th-row"><button id="bc">${makeIcon('circle-help')} COMO JOGAR</button><button id="bk">${makeIcon('star')} CRÉDITOS</button></div>
 <div class="th-sponsors"><small>APOIO</small><span><img src="${LOGO_E}" alt="Energisa"></span><span><img src="${LOGO_S}" alt="SENAI"></span></div>`;
+  refreshIcons($('#thMenu'));
   $('#thModal').hidden = true; theaterShow(); if (musicaAberturaExecutada()) fanfare('menu');
   $('#bj').onclick = () => { audio(); escolha() }; $('#bc').onclick = ajuda; $('#bk').onclick = creditos; $('#bj').focus({ preventScroll: true })
 }
 function ajuda() {
   sfx('sel'); show(`<div class="card">
 <div class="kicker">MANUAL DO CIDADÃO</div><h3>COMO JOGAR</h3>
-<p>🕹️ Use <b>setas/WASD</b> ou os botões de toque para explorar a cidade.</p>
-<p>❗ A conversa começa automaticamente quando você chega perto dos personagens.</p>
-<p>🧠 Responda com clique ou <b>1 a 4</b>. O jogo explica a resposta, inclusive quando você erra.</p>
-<p>🔥 Acertos seguidos criam <b>COMBO</b> e aumentam sua pontuação.</p>
-<p>⚠️ Cada erro ou tempo esgotado desconta <b>5 pontos</b>. A classe avança a cada <b>3 acertos</b>.</p>
-<p>🏆 Complete as missões do caminho e encare a <b>ocorrência final</b>, que mistura os conteúdos.</p>
+<p>${makeIcon('gamepad-2')} Use <b>setas/WASD</b> ou os botões de toque para explorar a cidade.</p>
+<p>${makeIcon('message-circle-more')} A conversa começa automaticamente quando você chega perto dos personagens.</p>
+<p>${makeIcon('brain-circuit')} Responda com clique ou <b>1 a 4</b>. O jogo explica a resposta, inclusive quando você erra.</p>
+<p>${makeIcon('flame')} Acertos seguidos criam <b>COMBO</b> e aumentam sua pontuação.</p>
+<p>${makeIcon('alert-triangle')} Cada erro ou tempo esgotado desconta <b>5 pontos</b>. A classe avança a cada <b>3 acertos</b>.</p>
+<p>${makeIcon('trophy')} Complete as missões do caminho e encare a <b>ocorrência final</b>, que mistura os conteúdos.</p>
 <div class="tip"><b>ESC</b> pausa a jornada quando você estiver andando.</div>
-<div class="two"><button id="vb">← VOLTAR</button><button id="playhelp" class="big">JOGAR ▶</button></div>
+<div class="two"><button id="vb">${makeIcon('arrow-left')} VOLTAR</button><button id="playhelp" class="big">JOGAR ${makeIcon('play')}</button></div>
 </div>`, 1); $('#vb').onclick = titulo; $('#playhelp').onclick = escolha
 }
-function escolha() { sfx('sel'); show(`<h3>ESCOLHA SEU CAMINHO</h3><p>Duas portas estão abertas. Qual você segue?</p><div class="two">${['P', 'S'].map(k => `<button id="b${k}"><img class="pt" alt="" src="${spr(PP(k), 'd', 0).toDataURL()}"><b>${k == 'P' ? '🛡️ PROTEÇÃO' : '🚔 SEGURANÇA'}</b><br>${k == 'P' ? 'Estatutos: direitos de crianças, jovens e idosos, e a rede que protege.' : 'Riscos, prevenção, participação e o Plano Nacional.'}</button>`).join('')}</div>`, 1); $('#bP').onclick = () => ini('P'); $('#bS').onclick = () => ini('S') }
+function escolha() { sfx('sel'); show(`<h3>ESCOLHA SEU CAMINHO</h3><p>Duas portas estão abertas. Qual você segue?</p><div class="two">${['P', 'S'].map(k => `<button id="b${k}"><img class="pt" alt="" src="${spr(PP(k), 'd', 0).toDataURL()}"><b>${k == 'P' ? makeIcon('book-open') + ' ESTATUTOS' : makeIcon('shield-alert') + ' SEGURANÇA PÚBLICA'}</b><br>${k == 'P' ? 'ECA, Estatuto da Juventude, Estatuto da Pessoa Idosa e Conselho Tutelar.' : 'Fatores de risco, políticas públicas, participação e PNSP.'}</button>`).join('')}</div>`, 1); $('#bP').onclick = () => ini('P'); $('#bS').onclick = () => ini('S') }
 function ini(p) {
   S = { p, pts: 0, done: 0, classe: 0, h: {}, x: 8.5, y: 4.5, d: 'd', wk: 0, cb: 0, best: 0, tot: 0, hit: 0, q: 0, ach: [], seqErro: 0, parado: 0, evt: null, started: Date.now() }; keys = {}; definirTemaMusical('a'); sfx('go'); hud();
-  show(`<h3>${p == 'P' ? 'REDE DE PROTEÇÃO' : 'EQUIPE DE SEGURANÇA'}</h3><p>${p == 'P' ? 'Você começa na Rede de Proteção da cidade.' : 'Você começa na equipe de segurança da cidade.'} Procure o ❗ no mapa. As classes do jogo são fictícias.</p><button id="go" class="big">COMEÇAR</button>`); $('#go').onclick = () => { sfx('sel'); hide() }; $('#go').focus()
+  show(`<h3>${p == 'P' ? 'ESTATUTOS' : 'POLÍTICAS DE SEGURANÇA'}</h3><p>${p == 'P' ? 'Conheça os direitos previstos nos estatutos e o papel do Conselho Tutelar.' : 'Explore os fatores de risco, as responsabilidades e o PNSP.'} Procure o ponto de atenção no mapa. As classes do jogo são fictícias.</p><button id="go" class="big">COMEÇAR</button>`); $('#go').onclick = () => { sfx('sel'); hide() }; $('#go').focus()
 }
 function run(m, i = 0) {
   const s = m.perguntas[i], o = emb([s.resposta, ...s.alternativas]); S.q = 0;
@@ -764,10 +846,10 @@ function falaCard(ok, k, ant) {
 function fim(m) {
   S.done++; if (m === F) return final(); const classeAnterior = S.classe; S.classe = Math.min(4, Math.floor(S.hit / 3)); hud(); sfx('win'); rain(50); if (S.done == M[S.p].length) definirTemaMusical('b');
   const avancou = S.classe > classeAnterior, chave = avancou ? 'classe' : 'missao', linhaF = sorteio('card' + chave, CARD[chave]); evento(chave);
-  show(`<h3 class="ok">${avancou ? 'CLASSE AVANÇADA!' : 'MISSÃO CUMPRIDA!'}</h3><p class="npcsay"><b>${m.personagem}</b> “${linhaF}”</p><p>${avancou ? 'Nova classe' : 'Classe atual'}: <b>${TIT[S.p][S.classe]}</b></p><p>${S.done == M[S.p].length ? 'ALERTA! Uma grande ocorrência acaba de acontecer na praça...' : 'Um novo ❗ apareceu na cidade.'}</p><button id="ok" class="big">VOLTAR À CIDADE</button>`); $('#ok').onclick = () => { sfx('sel'); hide() }; $('#ok').focus()
+  show(`<h3 class="ok">${avancou ? 'CLASSE AVANÇADA!' : 'MISSÃO CUMPRIDA!'}</h3><p class="npcsay"><b>${m.personagem}</b> “${linhaF}”</p><p>${avancou ? 'Nova classe' : 'Classe atual'}: <b>${TIT[S.p][S.classe]}</b></p><p>${S.done == M[S.p].length ? 'ALERTA! Uma grande ocorrência acaba de acontecer na praça...' : 'Um novo ponto de atenção apareceu na cidade.'}</p><button id="ok" class="big">VOLTAR À CIDADE</button>`); $('#ok').onclick = () => { sfx('sel'); hide() }; $('#ok').focus()
 }
 function final() {
-  S.classe = Math.min(4, Math.floor(S.hit / 3)); definirTemaMusical('a'); sfx('win'); rain(120); fanfare('final'); const a = S.hit / S.tot, stars = a > .85 ? '⭐⭐⭐' : a > .6 ? '⭐⭐' : '⭐', classeFinal = TIT[S.p][S.classe], linhaR = sorteio('cardfinal' + (a > .85 ? 'B' : a > .6 ? 'M' : 'R'), CARD[a > .85 ? 'finalBom' : a > .6 ? 'finalMedio' : 'finalRuim']);
+  S.classe = Math.min(4, Math.floor(S.hit / 3)); definirTemaMusical('a'); sfx('win'); rain(120); fanfare('final'); const a = S.hit / S.tot, stars = a > .85 ? 'NÍVEL 3' : a > .6 ? 'NÍVEL 2' : 'NÍVEL 1', classeFinal = TIT[S.p][S.classe], linhaR = sorteio('cardfinal' + (a > .85 ? 'B' : a > .6 ? 'M' : 'R'), CARD[a > .85 ? 'finalBom' : a > .6 ? 'finalMedio' : 'finalRuim']);
   let bs = 0; try { bs = +localStorage.cc || 0; if (S.pts > bs) localStorage.cc = bs = S.pts } catch (e) { }
   const b = ['Proteção', 'Segurança', 'Participação', 'Prevenção', 'Direitos'].filter(k => S.h[k]).map(k => { const p = Math.round(100 * S.h[k][0] / S.h[k][1]); return `<div>${k} ${p}%<div class="bar"><i style="width:${p}%"></i></div></div>` }).join('');
   const o = S.p == 'P' ? 'S' : 'P';
@@ -794,20 +876,20 @@ function desencravar() { if (!colideFixo(S.x, S.y)) return; for (let r = .1; r <
 function colisaoVeicular(a, ax, ay, b, bx, by) { const aw = a.axis == 'h' ? .74 : .36, ah = a.axis == 'h' ? .36 : .74, bw = b.axis == 'h' ? .74 : .36, bh = b.axis == 'h' ? .36 : .74; return Math.abs(ax - bx) < aw + bw && Math.abs(ay - by) < ah + bh }
 
 /* ===== TRÁFEGO ===== */
-/* CAIXA = cruzamento + faixas de pedestres. O semáforo só abre a via cruzada quando nenhum carro toca nessa área. */
+/* CAIXA = cruzamento + faixas de pedestres. A via cruzada libera quando nenhum carro ocupa essa área. */
 const CAIXA = { x0: 8.1, x1: 11.9, y0: 4.2, y1: 7.8 }, FREIO = 4.5, ACEL = 2.4;
-let proxVia = 'v';
+let proximoEixo = 'v';
 const noCruzamento = c => { const w = c.axis == 'h' ? .7 : .34, h = c.axis == 'h' ? .34 : .7; return c.x + w > CAIXA.x0 && c.x - w < CAIXA.x1 && c.y + h > CAIXA.y0 && c.y - h < CAIXA.y1 };
-function atualizarSemaforo(dt) {
-  tempoVia += dt;
-  if (viaVerde) { if (tempoVia >= 8) { proxVia = viaVerde == 'h' ? 'v' : 'h'; viaVerde = ''; tempoVia = 0 } return }   /* todos vermelhos */
-  if (tempoVia >= 1 && !CARS.some(noCruzamento)) { viaVerde = proxVia; tempoVia = 0 }
+function atualizarFluxoCruzamento(dt) {
+  tempoFluxo += dt;
+  if (eixoLiberado) { if (tempoFluxo >= 8) { proximoEixo = eixoLiberado == 'h' ? 'v' : 'h'; eixoLiberado = ''; tempoFluxo = 0 } return }   /* intervalo entre fluxos */
+  if (tempoFluxo >= 1 && !CARS.some(noCruzamento)) { eixoLiberado = proximoEixo; tempoFluxo = 0 }
 }
 /* Distância livre à frente do carro (em tiles) até o primeiro motivo para parar. */
 function folga(c, civis) {
   const h = c.axis == 'h', d = c.dir, pos = h ? c.x : c.y, lat = h ? c.y : c.x; let g = Infinity;
   const ver = (q, livre) => { const a = (q - pos) * d; if (a > -.8) g = Math.min(g, Math.max(0, a - livre)) };   /* só considera o que está à frente */
-  if (c.axis != viaVerde) { const l = LINHA_PARADA[c.axis][h ? (d > 0 ? 'esquerda' : 'direita') : (d > 0 ? 'norte' : 'sul')], a = (l - pos) * d; if (a >= -.02) g = Math.min(g, Math.max(0, a)) }
+  if (c.axis != eixoLiberado) { const l = LINHA_PARADA[c.axis][h ? (d > 0 ? 'esquerda' : 'direita') : (d > 0 ? 'norte' : 'sul')], a = (l - pos) * d; if (a >= -.02) g = Math.min(g, Math.max(0, a)) }
   CARS.forEach(o => { if (o !== c && o.axis == c.axis && o.dir == d && Math.abs((h ? o.y : o.x) - lat) < .4) ver(h ? o.x : o.y, 1.55) });
   civis.forEach(q => {
     if (q && naVia(q.x, q.y) && (h ? Math.abs(q.y - c.y) : Math.abs(q.x - c.x)) < .52) {
@@ -822,7 +904,7 @@ function folga(c, civis) {
   return g
 }
 function moverCarros(dt, civis) {
-  atualizarSemaforo(dt);
+  atualizarFluxoCruzamento(dt);
   CARS.forEach(c => {
     const h = c.axis == 'h', g = folga(c, civis), alvo = Math.min(c.speed, Math.sqrt(2 * FREIO * Math.max(0, g)));
     c.v += Math.max(-FREIO * 1.6 * dt, Math.min(ACEL * dt, alvo - c.v)); c.movendo = c.v > .05;

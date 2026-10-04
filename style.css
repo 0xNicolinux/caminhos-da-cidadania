@@ -44,6 +44,22 @@
     touch-action: manipulation;
   }
 
+  .app-icon,
+  [data-lucide] {
+    width: 1.15em;
+    height: 1.15em;
+    display: inline-block;
+    vertical-align: -0.15em;
+    stroke: #fff3c4;
+    fill: none;
+    stroke-width: 2.3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 2px rgba(255, 204, 0, .38));
+    opacity: 0.98;
+  }
+
   ul, ol, nav ul { list-style: none; }
 
   /* Não removemos focus outline aqui: usamos :focus-visible */
