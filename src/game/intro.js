@@ -146,7 +146,7 @@ function creditos() {
 <p>Bem-vindo(a) a <b>Nova Esperança</b>. Aqui, conhecimento não é decoração: ele muda a forma como você entende cada situação.</p>
 <div class="featureGrid"><div class="feature"><b>ESTATUTOS</b><span>ECA, juventude e pessoa idosa</span></div><div class="feature"><b>SEGURANÇA</b><span>Riscos e prevenção</span></div><div class="feature"><b>POLÍTICAS PÚBLICAS</b><span>Participação social e PNSP</span></div></div>
 <div class="creditsPanel"><div class="creditsTitle">EQUIPE RESPONSÁVEL PELO DESENVOLVIMENTO</div>
-<div class="teamGrid"><div class="teamMember"><b>EQUIPE</b><span>Nícolas Adriel</span></div><div class="teamMember"><b>EQUIPE</b><span>Gustavo Henrique</span></div><div class="teamMember"><b>EQUIPE</b><span>Marcela Stolv</span></div><div class="teamMember"><b>EQUIPE</b><span>Bruna Oliveira</span></div></div>
+<div class="teamGrid"><div class="teamMember"><b>EQUIPE</b><span>Nícolas Adriel</span></div><div class="teamMember"><b>EQUIPE</b><span>Gustavo Dantas</span></div><div class="teamMember"><b>EQUIPE</b><span>Marcela Santos</span></div><div class="teamMember"><b>EQUIPE</b><span>Bruna Telles</span></div></div>
 <div class="classLine">TURMA <span class="neon">SENAI — ENERGISA · APB-044.029</span></div>
 <div class="creditsTitle" style="margin-top:10px">EMPRESAS / INSTITUIÇÕES ENVOLVIDAS</div>
 <div class="partners"><div class="partner"><img src="${LOGO_E}" alt="Energisa"></div><div class="partner"><img src="${LOGO_S}" alt="SENAI"></div></div></div>

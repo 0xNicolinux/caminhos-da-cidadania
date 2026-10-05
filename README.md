@@ -9,9 +9,9 @@ Caminhos da Cidadania foi pensado como uma experiência lúdica para aproximar e
 ### Equipe responsável pelo desenvolvimento
 
 - Nícolas Adriel
-- Marcela Stolv
-- Gustavo Henrique
-- Bruna Oliveira
+- Marcela Santos
+- Gustavo Dantas
+- Bruna Telles
 
 ### Parceiros e instituição envolvida
 
