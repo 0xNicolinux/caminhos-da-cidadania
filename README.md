@@ -109,3 +109,7 @@ Contribuições são bem-vindas. Para colaborar:
 ## Licença
 
 Este projeto está licenciado sob a licença MIT. Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+## Placar de líderes
+
+O placar usa Supabase (gratuito). Passo a passo em [PLACAR.md](PLACAR.md); a configuração fica em `src/config.js`.

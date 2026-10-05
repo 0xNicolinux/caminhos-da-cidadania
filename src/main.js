@@ -1,6 +1,7 @@
 import { NOME, TIT } from './data/game-config.js';
 import { carregarMissoes } from './data/missions.js';
 import { CARD, REACAO, RUA, DIAL, PET, EMO } from './data/falas.js';
+import { placarAtivo, enviarPontuacao, buscarPlacar, htmlLista, nomeSalvo, guardarNome, limparNome, esc } from './data/placar.js';
 import { embaralhar as emb, sortearSemRepetir as sorteio } from './utils/random.js';
 import { LOGO_E, LOGO_S } from './assets/logos.js';
 import {
@@ -730,7 +731,7 @@ function desenhar(t, civis) {
 }
 
 /* ===== JOGO ===== */
-let S = null, keys = {}, last = 0, tw = null;
+let S = null, keys = {}, last = 0, tw = null, JOGADOR = '';
 const lista = () => [...M[S.p], F], cur = () => lista()[S.done];
 const show = (h, full) => { theaterHide(); ov.className = 'on' + (full ? ' full' : ''); ov.innerHTML = stripEmoji(h); ov.scrollTop = 0; refreshIcons(ov) }, hide = () => { ov.className = '' };
 function atualizarPersonagemTopo() {
@@ -738,7 +739,7 @@ function atualizarPersonagemTopo() {
   if (S) { const url = spr(PP(S.p), 'd', 0).toDataURL(); if (img.dataset.k !== S.p) { img.src = url; img.dataset.k = S.p } img.hidden = false; orb.classList.add('has-char') }
   else { img.hidden = true; img.dataset.k = ''; orb.classList.remove('has-char') }
 }
-function hud() { atualizarPersonagemTopo(); $('#hi').innerHTML = S ? `<b>${NOME[S.p]}</b> · ${TIT[S.p][S.classe]}<br>${makeIcon('star')} ${S.pts}${S.cb > 1 ? ' ' + makeIcon('flame') + ' x' + S.cb : ''} · missões ${Math.min(S.done, M[S.p].length)}/${M[S.p].length} ${deluxeProgress()}` : 'CAMINHOS DA<br>CIDADANIA' }
+function hud() { atualizarPersonagemTopo(); $('#hi').innerHTML = S ? `<b>${JOGADOR ? esc(JOGADOR) : NOME[S.p]}</b> · ${TIT[S.p][S.classe]}<br>${makeIcon('star')} ${S.pts}${S.cb > 1 ? ' ' + makeIcon('flame') + ' x' + S.cb : ''} · missões ${Math.min(S.done, M[S.p].length)}/${M[S.p].length} ${deluxeProgress()}` : 'CAMINHOS DA<br>CIDADANIA' }
 function type(el, txt, done) { let i = 0; clearInterval(tw); const sk = () => { clearInterval(tw); el.textContent = txt; ov.onclick = null; done() }; ov.onclick = sk; tw = setInterval(() => { i += 2; el.textContent = txt.slice(0, i); if (i % 6 == 0) sfx('tx'); if (i >= txt.length) sk() }, 28) }
 function badge(t) { return `<span class="achievement">${t}</span>` }
 function deluxeProgress() { if (!S) return ''; const pct = Math.min(100, Math.round((S.done / M[S.p].length) * 100)); return `<div class="bar"><i style="width:${pct}%"></i></div><small>${pct}% da campanha principal</small>` }
@@ -769,11 +770,11 @@ document.addEventListener('fullscreenchange', () => { if (!document.fullscreenEl
 function titulo() {
   S = null; definirTemaMusical('a'); hud(); hide();
   $('#thMenu').innerHTML = `<button id="bj" class="big">${makeIcon('play')} COMEÇAR JORNADA</button>
-<div class="th-row"><button id="bc">${makeIcon('circle-help')} COMO JOGAR</button><button id="bk">${makeIcon('star')} CRÉDITOS</button></div>
+<div class="th-row"><button id="bc">${makeIcon('circle-help')} COMO JOGAR</button><button id="bl">${makeIcon('trophy')} PLACAR</button><button id="bk">${makeIcon('star')} CRÉDITOS</button></div>
 <div class="th-sponsors"><small>APOIO</small><span><img src="${LOGO_E}" alt="Energisa"></span><span><img src="${LOGO_S}" alt="SENAI"></span></div>`;
   refreshIcons($('#thMenu'));
   $('#thModal').hidden = true; theaterShow(); if (musicaAberturaExecutada()) fanfare('menu');
-  $('#bj').onclick = () => { audio(); escolha() }; $('#bc').onclick = ajuda; $('#bk').onclick = creditos; $('#bj').focus({ preventScroll: true })
+  $('#bj').onclick = () => { audio(); comecar() }; $('#bc').onclick = ajuda; $('#bl').onclick = placar; $('#bk').onclick = creditos; $('#bj').focus({ preventScroll: true })
 }
 function ajuda() {
   sfx('sel'); show(`<div class="card">
@@ -782,20 +783,28 @@ function ajuda() {
 <p>${makeIcon('message-circle-more')} A conversa começa automaticamente quando você chega perto dos personagens.</p>
 <p>${makeIcon('brain-circuit')} Responda com clique ou pelo <b>número da alternativa</b> no teclado. Você tem <b>30 segundos</b> por pergunta, e o jogo explica a resposta, inclusive quando você erra.</p>
 <p>${makeIcon('flame')} Acertos seguidos criam <b>COMBO</b> e aumentam sua pontuação.</p>
-<p>${makeIcon('alert-triangle')} Cada erro ou tempo esgotado desconta <b>5 pontos</b>. A classe avança a cada <b>3 acertos</b>.</p>
+<p>${makeIcon('alert-triangle')} Respostas rápidas dão <b>bônus de pontos</b>. Cada erro ou tempo esgotado desconta <b>5 pontos</b>. A classe avança a cada <b>3 acertos</b>.</p>
 <p>${makeIcon('trophy')} Complete as missões do caminho e encare a <b>ocorrência final</b>, que mistura os conteúdos.</p>
 <div class="tip"><b>ESC</b> pausa a jornada quando você estiver andando.</div>
 <div class="two"><button id="vb">${makeIcon('arrow-left')} VOLTAR</button><button id="playhelp" class="big">JOGAR ${makeIcon('play')}</button></div>
-</div>`, 1); $('#vb').onclick = titulo; $('#playhelp').onclick = escolha
+</div>`, 1); $('#vb').onclick = titulo; $('#playhelp').onclick = comecar
+}
+function comecar() {
+  if (!placarAtivo()) return escolha();
+  sfx('sel');
+  show(`<div class="card"><div class="kicker">IDENTIFICAÇÃO</div><h3>QUAL É O SEU NOME?</h3><p>Ele aparece no placar de líderes quando você concluir a última missão.</p><form id="nf" class="nome-form" autocomplete="off"><input id="nm" maxlength="16" placeholder="Seu nome ou apelido" value="${esc(JOGADOR || nomeSalvo())}" enterkeyhint="go" autocapitalize="words" aria-label="Seu nome"><small id="nmMsg" role="alert"></small><div class="two"><button type="button" id="vb">${makeIcon('arrow-left')} VOLTAR</button><button type="submit" class="big">CONTINUAR ${makeIcon('play')}</button></div></form></div>`, 1);
+  const nm = $('#nm'); nm.focus({ preventScroll: true }); nm.select();
+  $('#vb').onclick = titulo;
+  $('#nf').onsubmit = e => { e.preventDefault(); const n = limparNome(nm.value); if (n.length < 2) { $('#nmMsg').textContent = 'Digite ao menos 2 letras.'; nm.focus(); return } JOGADOR = n; guardarNome(n); escolha() }
 }
 function escolha() { sfx('sel'); show(`<h3>ESCOLHA SEU CAMINHO</h3><p>Duas portas estão abertas. Qual você segue?</p><div class="two">${['P', 'S'].map(k => `<button id="b${k}"><img class="pt" alt="" src="${spr(PP(k), 'd', 0).toDataURL()}"><b>${k == 'P' ? makeIcon('book-open') + ' ESTATUTOS' : makeIcon('shield-alert') + ' SEGURANÇA PÚBLICA'}</b><br>${k == 'P' ? 'ECA, Estatuto da Juventude, Estatuto da Pessoa Idosa e Conselho Tutelar.' : 'Fatores de risco, políticas públicas, participação e PNSP.'}</button>`).join('')}</div>`, 1); $('#bP').onclick = () => ini('P'); $('#bS').onclick = () => ini('S') }
 function ini(p) {
-  S = { p, pts: 0, done: 0, classe: 0, h: {}, x: 8.5, y: 4.5, d: 'd', wk: 0, cb: 0, best: 0, tot: 0, hit: 0, q: 0, ach: [], seqErro: 0, parado: 0, evt: null, started: Date.now() }; keys = {}; definirTemaMusical('a'); sfx('go'); hud();
+  S = { p, pts: 0, done: 0, classe: 0, h: {}, x: 8.5, y: 4.5, d: 'd', wk: 0, cb: 0, best: 0, tot: 0, hit: 0, q: 0, ach: [], erros: [], mh: 0, seqErro: 0, parado: 0, evt: null, started: Date.now() }; keys = {}; definirTemaMusical('a'); sfx('go'); hud();
   show(`<h3>${p == 'P' ? 'ESTATUTOS' : 'POLÍTICAS DE SEGURANÇA'}</h3><p>${p == 'P' ? 'Conheça os direitos previstos nos estatutos e o papel do Conselho Tutelar.' : 'Explore os fatores de risco, as responsabilidades e o PNSP.'} Procure o ponto de atenção no mapa. No celular, toque em um ponto para caminhar até lá. As classes do jogo são fictícias.</p><button id="go" class="big">COMEÇAR</button>`); $('#go').onclick = () => { sfx('sel'); hide() }; $('#go').focus()
 }
 function run(m, i = 0) {
-  const s = m.perguntas[i], o = emb([s.resposta, ...s.alternativas]); S.q = 0;
-  show(`<div class="who"><img class="pt" alt="" src="${spr(NP(m), 'd', 0).toDataURL()}"><div><h3>${m.titulo}</h3><small>${m.personagem} · pergunta ${i + 1} de ${m.perguntas.length}</small></div></div><div class="bar" id="tb"><i></i></div><p id="tx"></p><div id="op"></div>`);
+  const s = m.perguntas[i], o = emb([s.resposta, ...s.alternativas]); S.q = 0; if (i === 0) S.mh = 0;
+  show(`<div class="who"><img class="pt" alt="" src="${spr(NP(m), 'd', 0).toDataURL()}"><div><h3>${m.titulo}</h3><small>${m.personagem} · pergunta ${i + 1} de ${m.perguntas.length}</small></div></div><div class="bar timer" id="tb"><i></i><span id="ts">30s</span></div><p id="tx"></p><div id="op"></div>`);
   type($('#tx'), s.pergunta, () => {
     $('#op').innerHTML = o.map((x, k) => `<button data-k="${k}"><b>${k + 1}</b>${x}</button>`).join('');
     $('#op').querySelectorAll('button').forEach(b => b.onclick = () => resp(m, i, o, +b.dataset.k)); S.q = 1; S.tm = S.tmax = 30; S.cur = { m, i, o }
@@ -803,8 +812,8 @@ function run(m, i = 0) {
 }
 function resp(m, i, o, k) {
   if (!S.q) return; S.q = 0; const s = m.perguntas[i], ok = k >= 0 && o[k] == s.resposta, h = S.h[s.categoria] = S.h[s.categoria] || [0, 0]; h[1]++; S.tot++; let gn = 0; const ant = S.cb;
-  if (ok) { h[0]++; S.hit++; S.cb++; S.seqErro = 0; gn = 10 + 5 * Math.min(S.cb - 1, 3); S.pts += gn; burst(m); sfx('ok'); if (S.cb == 3 && !S.ach.includes('combo')) { S.ach.push('combo'); fanfare('achievement') } } else { S.cb = 0; S.seqErro++; S.pts = Math.max(0, S.pts - 5); shake(); sfx('no') } hud(); const linha = falaCard(ok, k, ant); evento(ok ? (S.cb >= 3 ? 'combo' : 'ok') : k < 0 ? 'tempo' : 'no');
-  show(`<h3 class="${ok ? 'ok' : 'no'}">${ok ? '+' + gn + ' PONTOS' + (S.cb > 1 ? ' · COMBO x' + S.cb : '') : k < 0 ? 'TEMPO ESGOTADO · -5 PONTOS' : 'RESPOSTA ERRADA · -5 PONTOS'}</h3><p class="npcsay"><b>${m.personagem}</b> “${linha}”</p><p><b>${ok ? 'Certo!' : 'Resposta certa: ' + s.resposta}</b></p><p>${s.explicacao}</p><button id="nx" class="big">CONTINUAR</button>`);
+  if (ok) { h[0]++; S.hit++; S.cb++; S.seqErro = 0; S.mh++; const veloz = S.tm >= 20 ? 5 : S.tm >= 10 ? 2 : 0; gn = 10 + 5 * Math.min(S.cb - 1, 3) + veloz; S.pts += gn; S.veloz = veloz; burst(m); sfx('ok'); if (S.cb == 3 && !S.ach.includes('combo')) { S.ach.push('combo'); fanfare('achievement') } } else { S.erros.push({ p: s.pergunta, r: s.resposta, e: s.explicacao, c: s.categoria }); S.veloz = 0; S.cb = 0; S.seqErro++; S.pts = Math.max(0, S.pts - 5); shake(); sfx('no') } hud(); const linha = falaCard(ok, k, ant); evento(ok ? (S.cb >= 3 ? 'combo' : 'ok') : k < 0 ? 'tempo' : 'no');
+  show(`<h3 class="${ok ? 'ok' : 'no'}">${ok ? '+' + gn + ' PONTOS' + (S.cb > 1 ? ' · COMBO x' + S.cb : '') + (S.veloz ? ' · RÁPIDO +' + S.veloz : '') : k < 0 ? 'TEMPO ESGOTADO · -5 PONTOS' : 'RESPOSTA ERRADA · -5 PONTOS'}</h3><p class="npcsay"><b>${m.personagem}</b> “${linha}”</p><p class="gabarito ${ok ? 'g-ok' : 'g-no'}"><small>${ok ? 'VOCÊ ACERTOU' : 'RESPOSTA CERTA'}</small>${s.resposta}</p><p class="explica">${s.explicacao}</p><button id="nx" class="big">CONTINUAR</button>`);
   $('#nx').onclick = () => { sfx('sel'); i + 1 < m.perguntas.length ? run(m, i + 1) : fim(m) }; $('#nx').focus()
 }
 function falaCard(ok, k, ant) {
@@ -819,15 +828,38 @@ function falaCard(ok, k, ant) {
 function fim(m) {
   S.done++; if (m === F) return final(); const classeAnterior = S.classe; S.classe = Math.min(4, Math.floor(S.hit / 3)); hud(); sfx('win'); rain(50); if (S.done == M[S.p].length) definirTemaMusical('b');
   const avancou = S.classe > classeAnterior, chave = avancou ? 'classe' : 'missao', linhaF = sorteio('card' + chave, CARD[chave]); evento(chave);
-  show(`<h3 class="ok">${avancou ? 'CLASSE AVANÇADA!' : 'MISSÃO CUMPRIDA!'}</h3><p class="npcsay"><b>${m.personagem}</b> “${linhaF}”</p><p>${avancou ? 'Nova classe' : 'Classe atual'}: <b>${TIT[S.p][S.classe]}</b></p><p>${S.done == M[S.p].length ? 'ALERTA! Uma grande ocorrência acaba de acontecer na praça...' : 'Um novo ponto de atenção apareceu na cidade.'}</p><button id="ok" class="big">VOLTAR À CIDADE</button>`); $('#ok').onclick = () => { sfx('sel'); hide() }; $('#ok').focus()
+  show(`<h3 class="ok">${avancou ? 'CLASSE AVANÇADA!' : 'MISSÃO CUMPRIDA!'}</h3><p class="npcsay"><b>${m.personagem}</b> “${linhaF}”</p><div class="chips"><span>Acertos <b>${S.mh}/${m.perguntas.length}</b></span><span>Pontos <b>${S.pts}</b></span><span>${avancou ? 'Nova classe' : 'Classe'} <b>${TIT[S.p][S.classe]}</b></span></div><p>${S.done == M[S.p].length ? 'ALERTA! Uma grande ocorrência acaba de acontecer na praça...' : 'Um novo ponto de atenção apareceu na cidade.'}</p><button id="ok" class="big">VOLTAR À CIDADE</button>`); $('#ok').onclick = () => { sfx('sel'); hide() }; $('#ok').focus()
 }
 function final() {
   S.classe = Math.min(4, Math.floor(S.hit / 3)); definirTemaMusical('a'); sfx('win'); rain(120); fanfare('final'); const a = S.hit / S.tot, stars = a > .85 ? 'NÍVEL 3' : a > .6 ? 'NÍVEL 2' : 'NÍVEL 1', classeFinal = TIT[S.p][S.classe], linhaR = sorteio('cardfinal' + (a > .85 ? 'B' : a > .6 ? 'M' : 'R'), CARD[a > .85 ? 'finalBom' : a > .6 ? 'finalMedio' : 'finalRuim']);
-  let bs = 0; try { bs = +(localStorage.getItem('caminhos-da-cidadania:recorde') ?? localStorage.cc) || 0; if (S.pts > bs) { bs = S.pts; localStorage.setItem('caminhos-da-cidadania:recorde', bs) } } catch (e) { }
-  const b = ['Proteção', 'Segurança', 'Participação', 'Prevenção', 'Direitos'].filter(k => S.h[k]).map(k => { const p = Math.round(100 * S.h[k][0] / S.h[k][1]); return `<div>${k} ${p}%<div class="bar"><i style="width:${p}%"></i></div></div>` }).join('');
+  let bs = 0, novoRec = false; try { bs = +(localStorage.getItem('caminhos-da-cidadania:recorde') ?? localStorage.cc) || 0; if (S.pts > bs) { novoRec = bs > 0; bs = S.pts; localStorage.setItem('caminhos-da-cidadania:recorde', bs) } } catch (e) { }
+  const b = Object.keys(S.h).map(k => { const p = Math.round(100 * S.h[k][0] / S.h[k][1]); return `<div class="cat"><span>${k}</span><b>${S.h[k][0]}/${S.h[k][1]} · ${p}%</b><div class="bar"><i style="width:${p}%"></i></div></div>` }).join('');
+  const rev = S.erros.length ? `<div class="revisao"><h4>PARA REVISAR</h4>${S.erros.slice(0, 3).map(x => `<details><summary>${x.c}: ${x.r}</summary><p>${x.e}</p></details>`).join('')}${S.erros.length > 3 ? `<small>+${S.erros.length - 3} outras questões erradas</small>` : ''}</div>` : '<p class="npcsay"><b>Cidade</b> Nenhum erro: você dominou o conteúdo!</p>';
   const o = S.p == 'P' ? 'S' : 'P';
-  show(`<h3>${stars} ${classeFinal}</h3><p class="npcsay"><b>${F.personagem}</b> “${linhaR}”</p><p><b>"Você escolheu uma profissão. Mas a cidade nunca funcionou com apenas uma."</b></p>${b}<p>Estatutos protegem direitos, e as Políticas de Segurança organizam riscos e ações. Juntos formam uma rede.<br>Pontos: <b>${S.pts}</b> · Acertos: ${S.hit}/${S.tot} · Recorde: ${bs}</p><button id="o" class="big">JOGAR O CAMINHO ${NOME[o].toUpperCase()}</button><button id="r">Voltar ao início</button>`, 1);
-  $('#o').onclick = () => ini(o); $('#r').onclick = titulo
+  show(`<h3>${stars} ${classeFinal}</h3><p class="npcsay"><b>${F.personagem}</b> “${linhaR}”</p><p><b>"Você escolheu uma profissão. Mas a cidade nunca funcionou com apenas uma."</b></p>${b}<p>Estatutos protegem direitos, e as Políticas de Segurança organizam riscos e ações. Juntos formam uma rede.<br>Pontos: <b>${S.pts}</b> · Acertos: ${S.hit}/${S.tot} · Recorde: ${bs}${novoRec ? ' <span class="achievement">NOVO RECORDE</span>' : ''}</p>${rev}<div id="plc"></div><button id="o" class="big">JOGAR O CAMINHO ${NOME[o].toUpperCase()}</button><button id="r">Voltar ao início</button>`, 1);
+  $('#o').onclick = () => ini(o); $('#r').onclick = titulo;
+  salvarFinal({ pts: S.pts, hit: S.hit, tot: S.tot, caminho: S.p, tempo: Math.round((Date.now() - S.started) / 1000) })
+}
+async function salvarFinal(d) {
+  const box = $('#plc'); if (!box || !placarAtivo() || !JOGADOR) return;
+  const tentar = async () => {
+    box.innerHTML = '<p class="plc-vazio">Salvando sua pontuação...</p>';
+    try { await enviarPontuacao({ ...d, nome: JOGADOR }) }
+    catch (e) { if (!box.isConnected) return; box.innerHTML = `<div class="plc-envio"><small>${esc(e.message)}</small><button id="plRe">TENTAR NOVAMENTE</button></div>`; $('#plRe').onclick = tentar; return }
+    if (!box.isConnected) return; sfx('ok'); mostrarPlacar(box, undefined, JOGADOR, 'PONTUAÇÃO SALVA · PLACAR');
+  };
+  tentar();
+}
+async function mostrarPlacar(box, filtro, destaque, titulo = 'PLACAR DE LÍDERES') {
+  box.innerHTML = `<div class="plc"><h4>${titulo}</h4><div class="plc-tabs">${[[undefined, 'GERAL'], ['P', 'ESTATUTOS'], ['S', 'SEGURANÇA']].map(([k, t]) => `<button data-f="${k || ''}" class="${k == filtro ? 'on' : ''}">${t}</button>`).join('')}</div><div class="plcCorpo"><p class="plc-vazio">Carregando...</p></div></div>`;
+  box.querySelectorAll('.plc-tabs button').forEach(b => b.onclick = () => { sfx('sel'); mostrarPlacar(box, b.dataset.f || undefined, destaque, titulo) });
+  let html; try { html = htmlLista(await buscarPlacar(filtro), destaque) } catch (e) { html = `<p class="plc-vazio">${esc(e.message)}</p>` }
+  const corpo = box.querySelector('.plcCorpo'); if (corpo) corpo.innerHTML = html
+}
+function placar() {
+  sfx('sel'); show(`<div class="card"><div class="kicker">HALL DA FAMA</div><div id="plcBox"></div><button id="vb">${makeIcon('arrow-left')} VOLTAR</button></div>`, 1);
+  $('#vb').onclick = titulo;
+  placarAtivo() ? mostrarPlacar($('#plcBox')) : $('#plcBox').innerHTML = '<p class="plc-vazio">O placar online ainda não foi configurado.</p>'
 }
 function obstaculo(x, y, r = .22) {
   return BL.some(b => x + r > b[0] && x - r < b[0] + b[2] && y + r > b[1] && y - r < b[1] + b[3]) ||
@@ -938,7 +970,7 @@ function loop(t) {
   moverCarros(dt, civis);
   atualizarFumaca(dt);
   if (S && !ov.classList.contains('on')) { atualizarMovimentoToque(dt); mover(dt) }
-  if (S && S.q) { S.tm -= dt; const b = $('#tb i'); if (b) { b.style.width = 100 * S.tm / S.tmax + '%'; b.style.background = S.tm < 8 ? 'var(--no)' : 'var(--ok)' } if (S.tm <= 0) resp(S.cur.m, S.cur.i, S.cur.o, -1) }
+  if (S && S.q) { S.tm -= dt; const b = $('#tb i'); if (b) { b.style.width = 100 * S.tm / S.tmax + '%'; b.style.background = S.tm < 8 ? 'var(--no)' : 'var(--ok)'; b.parentNode.classList.toggle('urgente', S.tm < 8); const ts = $('#ts'); if (ts) ts.textContent = Math.max(0, Math.ceil(S.tm)) + 's' } if (S.tm <= 0) resp(S.cur.m, S.cur.i, S.cur.o, -1) }
   PA.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 520 * dt; p.l -= dt }); for (let i = PA.length; i--;)if (PA[i].l <= 0) PA.splice(i, 1);
   desenhar(t, civis); requestAnimationFrame(loop)
 }

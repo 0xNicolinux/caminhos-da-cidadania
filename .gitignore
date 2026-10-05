@@ -1,0 +1,30 @@
+# Dependências e builds (caso o projeto ganhe um bundler no futuro)
+node_modules/
+dist/
+build/
+.cache/
+
+# Segredos: NUNCA suba chaves privadas (service_role) do Supabase
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.supabase/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+*.swp
+
+# Pacotes gerados
+*.zip
