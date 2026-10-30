@@ -1,115 +1,91 @@
 # Caminhos da Cidadania
 
-Jogo educativo em navegador desenvolvido pela turma de Assistente de Análise de Dados do SENAI/ENERGISA. A proposta do projeto é explorar cidadania, direitos, proteção e prevenção por meio de uma cidade interativa, conectando temas sociais à prática de aprendizagem em tecnologia e análise de dados.
+Jogo educativo para navegador desenvolvido por uma equipe de estudantes da turma de Assistente de Análise de Dados do **SENAI/ENERGISA**. A experiência utiliza uma cidade interativa, personagens e missões para abordar cidadania, direitos, proteção e prevenção.
 
-## Sobre o projeto
+## Sobre a experiência
 
-Caminhos da Cidadania foi pensado como uma experiência lúdica para aproximar estudantes e público em geral de temas importantes sobre convivência, direitos e participação social. Ao longo da jornada, o jogador percorre locais da cidade, conversa com personagens e responde desafios que estimulam a reflexão sobre como a cidadania é construída no cotidiano.
+O jogador percorre diferentes locais da cidade, interage com personagens e responde a desafios relacionados à convivência e à participação social. As perguntas apresentam explicações contextualizadas para apoiar a reflexão sobre as escolhas feitas durante a jornada.
 
-### Equipe responsável pelo desenvolvimento
+O projeto foi desenvolvido no contexto da turma **SENAI — ENERGISA · APB-044.029**.
+
+## Equipe
 
 - Nícolas Adriel
 - Marcela Santos
 - Gustavo Dantas
 - Bruna Telles
 
-### Parceiros e instituição envolvida
-
-- SENAI
-- ENERGISA
-- Turma: SENAI — ENERGISA · APB-044.029
-- Quantidade de estudantes: 4
-
 ## Objetivos pedagógicos
 
-- reconhecer direitos e deveres de crianças, adolescentes, jovens e idosos;
-- compreender a importância da proteção integral e da participação social;
-- refletir sobre vulnerabilidade, prevenção e ação coletiva;
-- conectar conteúdos de cidadania com situações reais da comunidade;
-- desenvolver uma experiência digital que dialogue com a formação profissional da turma.
+- Reconhecer direitos e deveres de crianças, adolescentes, jovens e idosos.
+- Compreender a importância da proteção integral e da participação social.
+- Refletir sobre vulnerabilidade, prevenção e ação coletiva.
+- Relacionar temas de cidadania a situações do cotidiano.
 
-## Como jogar
+## Acessar e jogar
 
-1. Acesse a versão online:
+A versão publicada está disponível em:
 
-```text
-https://0xnicolinux.github.io/caminhos-da-cidadania/
-```
+**[Jogar Caminhos da Cidadania](https://0xnicolinux.github.io/caminhos-da-cidadania/)**
 
-2. Ou rode localmente. Abrir o `index.html` direto (`file://`) **não funciona**, porque o jogo usa módulos ES e carrega o `missoes.json` via `fetch`, e o navegador bloqueia os dois nesse modo. Use um servidor local.
+### Controles
 
-### Executando localmente
+- **Computador:** utilize as setas do teclado ou as teclas WASD para movimentar o personagem.
+- **Celulares e tablets:** toque em um ponto do mapa para caminhar até ele; toque em outro ponto para alterar o destino.
+- **Áudio:** a reprodução é habilitada após a primeira interação com a página, respeitando as restrições de autoplay dos navegadores.
 
-No terminal, na raiz do projeto:
+### Executar localmente
 
-```bash
+O jogo utiliza módulos JavaScript e carrega `missoes.json` por meio de `fetch`. Por isso, abrir o `index.html` diretamente com `file://` não é suficiente: utilize um servidor HTTP local.
+
+Na raiz do projeto, execute:
+
+~~~bash
 python3 -m http.server 8000
-```
+~~~
 
-Depois acesse:
-
-```text
-http://localhost:8000
-```
-
-## Controles
-
-- Em celulares e tablets, toque em um ponto do mapa para o personagem caminhar até lá. Toque em outro ponto para mudar o destino.
-- No computador, use as setas ou WASD para andar.
-- O áudio é liberado na primeira interação com a página, pois navegadores bloqueiam reprodução automática antes de um toque ou tecla.
+Acesse [http://localhost:8000](http://localhost:8000).
 
 ## Funcionalidades
 
-- mundo urbano interativo em estilo retrô;
-- personagens e cenários com narrativa visual;
-- missões baseadas em temas de cidadania;
-- perguntas de múltipla escolha com explicação contextualizada;
-- feedback educativo para reforçar o aprendizado;
-- estrutura em JavaScript puro, sem dependências externas de build.
+- Cidade interativa com estética retrô.
+- Personagens, cenários e narrativa visual.
+- Missões relacionadas a temas de cidadania.
+- Perguntas de múltipla escolha.
+- Explicações e feedback educativo.
+- Placar de líderes opcional com Supabase.
+
+As instruções de configuração do placar estão em [PLACAR.md](./PLACAR.md); os parâmetros correspondentes ficam em `src/config.js`.
+
+## Tecnologias
+
+- **HTML5** — estrutura da aplicação.
+- **CSS3** — apresentação e layout.
+- **JavaScript (ES Modules)** — lógica, interações e carregamento dos dados.
+- **Canvas 2D** — renderização da experiência visual.
+- **Supabase** — serviço utilizado pelo placar de líderes.
+
+O projeto não depende de um processo de build com bundler para executar a experiência principal.
 
 ## Estrutura do projeto
 
-```text
+~~~text
 .
 ├── index.html
 ├── style.css
 ├── missoes.json
-├── README.md
 ├── LICENSE
-├── src/
-│   ├── main.js
-│   ├── assets/
-│   ├── data/          (missions.js, game-config.js, falas.js)
-│   ├── game/
-│   └── utils/
-└──
-```
-
-## Tecnologias
-
-- HTML5
-- CSS3
-- JavaScript (ES Modules)
-- Canvas
-
-## Requisitos
-
-- navegador moderno com suporte a JavaScript;
-- acesso local ao projeto ou servidor simples.
-
-## Contribuição
-
-Contribuições são bem-vindas. Para colaborar:
-
-1. faça um fork do projeto;
-2. crie uma branch com sua alteração;
-3. implemente a melhoria ou correção;
-4. abra um pull request descrevendo o que foi ajustado.
+└── src/
+    ├── main.js
+    ├── assets/
+    ├── data/
+    │   ├── missions.js
+    │   ├── game-config.js
+    │   └── falas.js
+    ├── game/
+    └── utils/
+~~~
 
 ## Licença
 
-Este projeto está licenciado sob a licença MIT. Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.
-
-## Placar de líderes
-
-O placar usa Supabase (gratuito). Passo a passo em [PLACAR.md](PLACAR.md); a configuração fica em `src/config.js`.
+Consulte o arquivo [LICENSE](./LICENSE) para as condições de uso e distribuição.
